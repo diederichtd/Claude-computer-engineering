@@ -1,0 +1,1466 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>COMPENclaude</title>
+<style>
+@page { size: A4; margin: 18mm 16mm 20mm; }
+:root { --ink:#1b1f24; --muted:#5b6470; --accent:#c2562f; --rule:#e3e6ea; --code:#f5f6f8; }
+* { box-sizing: border-box; }
+body { font: 10pt/1.5 -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--ink); margin: 0; background:#fff; }
+.cover { height: 255mm; display:flex; flex-direction:column; justify-content:center; page-break-after: always; }
+.cover .kicker { color: var(--accent); font-weight:600; letter-spacing:.12em; text-transform:uppercase; font-size:9pt; }
+.cover h1 { font-size: 48pt; margin: 6mm 0 4mm; letter-spacing:-.02em; line-height:1; }
+.cover p { font-size: 13pt; color: var(--muted); max-width: 140mm; margin:0; }
+.cover .tags { margin-top: 12mm; display:flex; flex-wrap:wrap; gap:2mm; }
+.cover .tags span { border:1px solid var(--rule); border-radius: 99px; padding: 1mm 3.5mm; font-size:9pt; color:var(--muted); }
+.cover .foot { margin-top:auto; font-size:9pt; color:var(--muted); border-top:1px solid var(--rule); padding-top:3mm; }
+.toc { page-break-after: always; }
+.toc h2 { font-size: 20pt; }
+.toc ol { list-style:none; padding:0; counter-reset:t; }
+.toc li { counter-increment:t; padding: 2.2mm 0; border-bottom:1px solid var(--rule); font-size:11.5pt; }
+.toc li::before { content: counter(t, decimal-leading-zero); color: var(--accent); font-weight:600; margin-right:5mm; font-variant-numeric: tabular-nums; }
+.toc a { color: inherit; text-decoration:none; }
+section { page-break-before: always; }
+section > h2 { font-size: 20pt; margin: 0 0 5mm; padding-bottom: 3mm; border-bottom: 2px solid var(--ink); letter-spacing:-.01em; }
+section > h2 .num { color: var(--accent); margin-right: 4mm; font-variant-numeric: tabular-nums; }
+h3 { font-size: 13pt; margin: 7mm 0 2mm; page-break-after: avoid; }
+h4 { font-size: 11pt; margin: 5mm 0 1.5mm; color: #2d333b; page-break-after: avoid; }
+p { margin: 0 0 2.5mm; }
+ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+li { margin: .6mm 0; }
+li.nested { margin-left: 5mm; list-style-type: circle; }
+code { font: 8.8pt/1.4 "SF Mono", Menlo, Consolas, monospace; background: var(--code); padding: .2mm 1mm; border-radius: 2px; }
+pre { background: var(--code); border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 3px; padding: 3mm 4mm; margin: 2mm 0 4mm; white-space: pre-wrap; word-break: break-word; page-break-inside: avoid; }
+pre code { background:none; padding:0; font-size: 8.3pt; }
+pre.src { page-break-inside: auto; }
+pre.src code { font-size: 7.4pt; }
+table { border-collapse: collapse; width: 100%; margin: 2mm 0 4mm; font-size: 8.8pt; page-break-inside: avoid; }
+th, td { border: 1px solid var(--rule); padding: 1.4mm 2mm; text-align: left; vertical-align: top; }
+th { background: #f0f2f4; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+a { color: var(--accent); }
+strong { font-weight: 650; }
+.pagebreak { display:none; }
+</style></head><body>
+<div class="cover">
+  <div class="kicker">Claude Skill · Computer Engineering</div>
+  <h1>COMPENclaude</h1>
+  <p>A working method, seven reference guides, and an exact calculator that make Claude precise on computer engineering problems.</p>
+  <div class="tags"><span>Digital logic &amp; HDL</span><span>Computer architecture</span><span>Low-level C &amp; assembly</span><span>Embedded systems</span><span>Operating systems</span><span>Networking</span><span>Circuits</span></div>
+  <div class="foot">Complete documentation · skill instructions · references · calculator source · MIT License</div>
+</div>
+<div class="toc"><h2>Contents</h2><ol><li><a href="#s1">Overview</a></li><li><a href="#s2">The Skill (SKILL.md)</a></li><li><a href="#s3">Reference: Digital Logic and HDL</a></li><li><a href="#s4">Reference: Computer Architecture</a></li><li><a href="#s5">Reference: Low-Level Programming</a></li><li><a href="#s6">Reference: Embedded Systems</a></li><li><a href="#s7">Reference: Operating Systems</a></li><li><a href="#s8">Reference: Networking</a></li><li><a href="#s9">Reference: Circuits and Electronics</a></li><li><a href="#s10">Templates</a></li><li><a href="#s11">Appendix: cecalc.py Source</a></li></ol></div>
+<section><h2 id="s1"><span class="num">01</span>Overview</h2>
+<p>A <a href="https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview">Claude skill</a> that makes Claude precise on computer engineering problems.</p>
+<p>In computer engineering, one wrong bit index or one missing stall cycle makes the whole answer wrong. General-purpose AI slips on exactly these details. COMPENclaude gives Claude the method, the reference material, and an exact calculator that a senior engineer and a good teaching assistant would bring: it states the assumptions that change the answer, shows the formula with units, computes the numbers instead of guessing them, and checks the result before replying.</p>
+<h3>What it does</h3>
+<table><thead><tr><th>Feature</th><th>What happens</th></tr></thead><tbody><tr><td><strong>States assumptions first</strong></td><td>Word size, endianness, forwarding, write policy, KB vs KiB: the details that decide whether an answer matches your textbook</td></tr><tr><td><strong>Exact calculations</strong></td><td>A built-in calculator handles two's complement, IEEE 754, cache geometry, AMAT, CPU time, Amdahl, paging, subnets, timers, baud rates, ADCs, RC circuits, Hamming codes, and CRC</td></tr><tr><td><strong>Cache simulator</strong></td><td>Runs an address trace through LRU or FIFO and labels every miss as compulsory, capacity, or conflict</td></tr><tr><td><strong>Pipeline diagrams</strong></td><td>Draws cycle-by-cycle charts and counts stalls under the forwarding model you name</td></tr><tr><td><strong>Correct HDL</strong></td><td>Synthesizable SystemVerilog with no latches, proper reset, explicit widths, and a self-checking testbench</td></tr><tr><td><strong>Safe firmware</strong></td><td>Embedded C with <code>volatile</code> where it belongs, atomic shared data, short ISRs, and no undefined behavior</td></tr><tr><td><strong>Trap checklist</strong></td><td>22 classic mistakes, from off-by-one bit ranges to <code>if</code> around condition variable waits, checked on every answer</td></tr><tr><td><strong>Debugging help</strong></td><td>Ranks likely causes, says how to confirm each one with a scope or logic analyzer, then gives the fix</td></tr><tr><td><strong>Teaching mode</strong></td><td>For students: intuition, formal rule, worked example, common mistake, then a practice question</td></tr><tr><td><strong>Design reviews</strong></td><td>Checklists for HDL and firmware, plus templates for lab reports, debug logs, and exam formula sheets</td></tr><tr><td><strong>Corrects wrong premises</strong></td><td>Says so when a question assumes something false, like "volatile makes it thread-safe"</td></tr></tbody></table>
+<p><strong>Topics:</strong> Boolean algebra, K-maps, FSMs, setup and hold timing, clock domain crossing, Verilog, SystemVerilog, VHDL, FPGAs, RISC-V, pipelining, branch prediction, out-of-order execution, caches, virtual memory, cache coherence, memory consistency, C and assembly, calling conventions, linking, microcontrollers, interrupts, timers, UART, SPI, I2C, CAN, ADCs, DMA, RTOS, low power, scheduling, synchronization, deadlock, page replacement, file systems, subnetting, TCP, error-correcting codes, MOSFET switches, and CMOS logic.</p>
+<h3>Install</h3>
+<h4>Claude.ai or the Claude desktop app</h4>
+<ol><li>Download <code>compenclaude.zip</code> from the Releases page, or build it yourself:<pre><code>cd skills &amp;&amp; zip -r ../compenclaude.zip compenclaude -x &#x27;*/__pycache__/*&#x27; &#x27;*.DS_Store&#x27;</code></pre></li><li>In Claude, open <strong>Settings</strong> and find <strong>Skills</strong> (under Capabilities or Customize, depending on your app version). Code execution needs to be turned on for skills to work.</li><li>Click <strong>Upload skill</strong> and choose <code>compenclaude.zip</code>.</li><li>Make sure the skill is toggled on.</li></ol>
+<h4>Claude Code (as a plugin)</h4>
+<pre><code>/plugin marketplace add diederichtd/COMPENclaude</code></pre>
+<pre><code>/plugin install compenclaude@compenclaude</code></pre>
+<h4>Claude Code (manual copy)</h4>
+<pre><code>git clone https://github.com/diederichtd/COMPENclaude.git</code></pre>
+<pre><code>mkdir -p ~/.claude/skills &amp;&amp; cp -r COMPENclaude/skills/compenclaude ~/.claude/skills/</code></pre>
+<p>For one project only, copy it to <code>.claude/skills/</code> inside that project instead.</p>
+<h3>How to use it</h3>
+<p>Ask Claude the way you'd ask a TA or a senior engineer. The skill turns on by itself when a question touches computer engineering. Some examples:</p>
+<ul><li>"32 KiB 8-way cache, 64-byte blocks, 32-bit addresses. Which set does 0x1234ABCD go to?"</li><li>"How many stalls does this RISC-V code have on a 5-stage pipeline with forwarding?"</li><li>"Encode −13.625 as an IEEE 754 single and explain each field."</li><li>"Write a synthesizable SystemVerilog UART transmitter with a testbench."</li><li>"My STM32 I2C read hangs at the busy flag. What should I check?"</li><li>"Split 10.20.0.0/22 into subnets for 200, 100, 50 and 2 hosts."</li><li>"I don't get setup and hold time. Exam next week."</li></ul>
+<p>Tips:</p>
+<ul><li>Name your textbook or course conventions if you know them (where branches resolve, which ADC formula your class uses). Claude will match them.</li><li>Give the part number for hardware questions. Register names and limits differ between chips.</li><li>Paste your own attempt. Claude can point to the exact step that went wrong.</li></ul>
+<h3>How it works</h3>
+<p>A skill is a folder with a <code>SKILL.md</code> file that Claude reads when a task matches the skill's description. Claude loads only the short description at first, then the full instructions when the skill triggers, and each reference file only when a question needs it. A subnetting question never loads the Verilog rules.</p>
+<pre><code>COMPENclaude/
+├── CLAUDE.md                    # instructions for Claude Code when working on this repo
+├── .claude-plugin/
+│   ├── plugin.json              # Claude Code plugin manifest
+│   └── marketplace.json         # lets people install with /plugin
+├── skills/
+│   └── compenclaude/            # the skill itself (this is what you zip)
+│       ├── SKILL.md             # method, routing table, trap checklist, modes
+│       ├── references/          # loaded only when needed
+│       │   ├── digital-logic.md
+│       │   ├── computer-architecture.md
+│       │   ├── low-level-programming.md
+│       │   ├── embedded-systems.md
+│       │   ├── operating-systems.md
+│       │   ├── networking.md
+│       │   └── circuits-electronics.md
+│       ├── assets/templates/    # review checklist, debug log, lab report, formula sheet, HDL module and testbench
+│       └── scripts/
+│           └── cecalc.py        # exact calculators with worked output
+├── docs/                        # the whole skill as one document (Markdown, HTML, PDF)
+├── evals/evals.json             # test prompts for checking skill behavior
+├── tests/                       # known-answer tests for the calculator
+├── tools/
+│   ├── validate_skill.py        # checks SKILL.md and manifests
+│   └── build_docs.py            # rebuilds the docs/ document
+└── .github/workflows/validate.yml</code></pre>
+<h4>The calculator</h4>
+<p>Works with Python 3.9 or newer and needs no extra packages. Every command prints its working.</p>
+<pre><code>python3 skills/compenclaude/scripts/cecalc.py float 0.1</code></pre>
+<pre><code>IEEE 754 single (binary32): 1 sign, 8 exponent (bias 127), 23 fraction bits
+  hex                     0x3DCCCCCD
+  fields s|exp|frac       0 | 01111011 | 10011001100110011001101
+  class                   normal
+  exponent                stored 123, unbiased -4
+  value                   +1.10011001100110011001101 (binary) x 2^-4
+  exact stored value      0.100000001490116119384765625
+  ...
+  rounding error          -1.490116E-9</code></pre>
+<pre><code>python3 skills/compenclaude/scripts/cecalc.py cache --size 64 --block 16 --addr-bits 8 --trace 0x00 0x10 0x40 0x00 0x80 0x04 0x50 0x10</code></pre>
+<pre><code>    #       address         tag    set   off  result  evicted tag  miss type
+    1           0x0         0x0      0     0  MISS                 compulsory
+    2          0x10         0x0      1     0  MISS                 compulsory
+    3          0x40         0x1      0     0  MISS            0x0  compulsory
+    4           0x0         0x0      0     0  MISS            0x1  conflict
+    ...
+  hits 0/8 (0.00%), misses 8 (compulsory 5, capacity 1, conflict 2)</code></pre>
+<table><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody><tr><td><code>conv</code></td><td>bases, two's complement, Gray code, byte order in memory</td></tr><tr><td><code>float</code></td><td>IEEE 754 encode/decode, exact stored value, rounding error, ULP</td></tr><tr><td><code>cache</code></td><td>tag/index/offset split, storage overhead, LRU/FIFO trace simulation with miss types</td></tr><tr><td><code>amat</code></td><td>multi-level average memory access time with global miss rates</td></tr><tr><td><code>cpu</code></td><td>CPU time from instruction count, CPI or instruction mix, and clock</td></tr><tr><td><code>amdahl</code></td><td>overall speedup, or the speedup needed to reach a target</td></tr><tr><td><code>vm</code></td><td>page offset and VPN bits, page-table size, number of levels, TLB reach</td></tr><tr><td><code>subnet</code></td><td>network, broadcast, host range, splitting, prefix for N hosts</td></tr><tr><td><code>timer</code></td><td>prescaler and reload values for a target frequency, with error</td></tr><tr><td><code>baud</code></td><td>UART divisor, actual baud rate, error, AVR and STM32 register values</td></tr><tr><td><code>adc</code></td><td>LSB size, code to voltage and back, quantization error, ideal SNR</td></tr><tr><td><code>rc</code></td><td>time constant, cutoff frequency, rise time, charge after time t</td></tr><tr><td><code>hamming</code></td><td>encode data bits, or check and correct a codeword</td></tr><tr><td><code>crc</code></td><td>CRC remainder by mod-2 division</td></tr></tbody></table>
+<p>Run <code>python3 skills/compenclaude/scripts/cecalc.py &lt;command&gt; -h</code> for options.</p>
+<h3>Full documentation</h3>
+<p>Everything in the skill, combined into one document with a contents page: the method, all seven reference guides, the templates, and the calculator source.</p>
+<ul><li>docs/COMPENclaude.pdf to read or print</li><li>docs/COMPENclaude.md as a single Markdown file</li></ul>
+<h3>Development</h3>
+<p>Run the tests and the validator before opening a pull request:</p>
+<pre><code>python3 -m unittest discover tests</code></pre>
+<pre><code>pip install pyyaml &amp;&amp; python3 tools/validate_skill.py</code></pre>
+<p>GitHub Actions runs both on every push and pull request.</p>
+<p>After editing the skill, rebuild the combined document:</p>
+<pre><code>python3 tools/build_docs.py --pdf</code></pre>
+<p>To check how the skill behaves, try the prompts in <code>evals/evals.json</code> with the skill on and off and compare the answers.</p>
+<h3>Contributing</h3>
+<p>Contributions are welcome: traps Claude still falls into, new calculator commands, better reference material, templates, or fixes. See CONTRIBUTING.md.</p>
+<h3>Limitations</h3>
+<ul><li>Claude can make mistakes. Check important results, especially anything that goes into hardware.</li><li>Part-specific facts (register names, electrical ratings) vary by chip. The skill points you to the datasheet section to confirm them.</li><li>Courses use different conventions for pipelines, scheduling tie-breaks, and ADC formulas. The skill makes Claude say which one it uses so you can match your class.</li><li>It doesn't replace simulation, a logic analyzer, or your reference manual. Follow your school's rules on AI use for graded work.</li></ul>
+<h3>License</h3>
+<p>MIT</p></section>
+<section><h2 id="s2"><span class="num">02</span>The Skill (SKILL.md)</h2>
+<p>You are working as a senior computer engineer who also teaches well. The field punishes vague answers: a wrong bit index, a missing stall cycle, or a blocking assignment in the wrong place makes the whole answer wrong. Precision comes first, then clarity.</p>
+<h3>Contents</h3>
+<ol><li>Route to the right reference</li><li>Compute with the calculator, never by eye</li><li>How to answer</li><li>Traps to check on every answer</li><li>Teaching mode</li><li>Design and review mode</li><li>Diagrams</li><li>Templates</li></ol>
+<h3>1. Route to the right reference</h3>
+<p>Load only the file(s) the question needs. Each one holds formulas, rules, worked examples, and the mistakes people (and models) make most.</p>
+<table><thead><tr><th>Topic</th><th>File</th></tr></thead><tbody><tr><td>Boolean algebra, K-maps, adders, flip-flops, FSMs, setup/hold timing, metastability, Verilog/SystemVerilog/VHDL</td><td><code>references/digital-logic.md</code></td></tr><tr><td>Performance equations, ISAs, RISC-V, pipelines and hazards, branch prediction, OoO, caches, virtual memory, coherence, consistency</td><td><code>references/computer-architecture.md</code></td></tr><tr><td>Number representation, IEEE 754, C pitfalls and UB, bit tricks, assembly and calling conventions, compile/link, tooling</td><td><code>references/low-level-programming.md</code></td></tr><tr><td>MCUs, startup code, GPIO, interrupts, timers, PWM, UART/SPI/I2C/CAN, ADC, DMA, RTOS, low power, firmware debugging</td><td><code>references/embedded-systems.md</code></td></tr><tr><td>Processes, threads, scheduling, synchronization, deadlock, paging and replacement, file systems</td><td><code>references/operating-systems.md</code></td></tr><tr><td>Layers, subnetting, TCP/UDP, delay and throughput, error detection and correction</td><td><code>references/networking.md</code></td></tr><tr><td>Ohm/KVL/KCL, dividers, RC, diodes/LEDs, MOSFET and BJT switches, CMOS power, logic levels, decoupling</td><td><code>references/circuits-electronics.md</code></td></tr></tbody></table>
+<h3>2. Compute with the calculator, never by eye</h3>
+<p><code>scripts/cecalc.py</code> (Python 3, standard library only) gives exact answers and prints its working. Run it whenever a question involves arithmetic from this list, and show the user the method as well as the result:</p>
+<pre><code>python3 scripts/cecalc.py conv -56 --bits 8                  # bases, two&#x27;s complement, Gray, endianness
+python3 scripts/cecalc.py float 0.1                          # IEEE 754 fields, exact stored value, error
+python3 scripts/cecalc.py float 0xC0490FDB --hex             # decode a bit pattern
+python3 scripts/cecalc.py cache --size 32KiB --block 64 --assoc 8 --addr-bits 32
+python3 scripts/cecalc.py cache --size 256 --block 16 --assoc 2 --addr-bits 16 --trace 0x0 0x40 0x80 0x0
+python3 scripts/cecalc.py amat --levels 1:0.05 10:0.2 --mem 100
+python3 scripts/cecalc.py cpu --ic 2G --mix 0.5:1,0.3:2,0.2:5 --clock 3GHz
+python3 scripts/cecalc.py amdahl --fraction 0.8 --speedup 10 --target 4
+python3 scripts/cecalc.py vm --va-bits 48 --page 4KiB --pte 8 --tlb 64
+python3 scripts/cecalc.py subnet 10.1.4.0/22 --split 24       # or: subnet --hosts 50
+python3 scripts/cecalc.py timer --clock 16MHz --target 1kHz --bits 16
+python3 scripts/cecalc.py baud --clock 16MHz --baud 115200
+python3 scripts/cecalc.py adc --bits 12 --vref 3.3V --volts 1.2
+python3 scripts/cecalc.py rc --r 10k --c 100nF --t 1ms
+python3 scripts/cecalc.py hamming 1011        # or: hamming 0110111 --check
+python3 scripts/cecalc.py crc --data 11010011101100 --poly 1011</code></pre>
+<p>The path is relative to this skill's folder. If the script cannot run (no shell), do the arithmetic step by step in writing and re-check each step instead of skipping it.</p>
+<h3>3. How to answer</h3>
+<p><strong>Pin down the assumptions first.</strong> Most disagreements between a correct answer and the answer key come from an unstated assumption. Before solving, state the ones that matter:</p>
+<ul><li>word size and signedness; byte- vs word-addressable memory; endianness</li><li>ISA and pipeline model (classic 5-stage? forwarding? branch resolved in which stage?)</li><li>cache write policy, write-allocate or not, replacement policy, initial state (cold?)</li><li>KB meaning 1000 or 1024 (memory sizes: 1024; data rates and clock frequencies: 1000)</li><li>bits vs bytes in bandwidth (Mbps vs MB/s)</li><li>clock edge, reset type (sync/async, active-high/low)</li></ul>
+<p>If the question leaves one open and it changes the answer, pick the textbook-standard choice, say so in one line, and mention how the answer changes under the other.</p>
+<p><strong>Show work at the level the answer needs.</strong> For a numeric problem: formula, substituted values with units, result, sanity check. For a design: block diagram in words or ASCII, interface (ports, widths, timing), then code. For a debugging question: most likely causes ranked by probability, how to confirm each with a measurement, then the fix.</p>
+<p><strong>Sanity-check every number.</strong> Is the CPI at least 1 on a scalar in-order pipeline? Does the tag + index + offset add up to the address width? Is the hit rate between 0 and 1? Is the frequency plausible for the technology? Does the current exceed a GPIO pin's rating (often around 20 mA)? Units consistent all the way through?</p>
+<p><strong>Code must be correct by construction.</strong></p>
+<ul><li>HDL: synthesizable unless asked for a testbench; <code>always_ff</code> with <code>&lt;=</code> for flops, <code>always_comb</code> with <code>=</code> and default assignments for logic; explicit widths; a reset strategy; no latches. Include a small self-checking testbench when the user is building something.</li><li>C for embedded: fixed-width types (<code>uint32_t</code>), <code>volatile</code> on MMIO and ISR-shared data, no UB, atomic access for shared multi-byte data, no blocking or <code>printf</code> inside ISRs.</li><li>Assembly: name the ISA and ABI; respect caller/callee-saved registers and stack alignment; comment each line in teaching contexts.</li></ul>
+<p><strong>Correct wrong premises.</strong> If the user's question assumes something false ("volatile makes it thread-safe", "more pipeline stages always means faster", "a 10-bit ADC gives 10 mV resolution at 5 V"), say so plainly and explain why before answering.</p>
+<h3>4. Traps to check on every answer</h3>
+<p>These are the recurring errors in this field. Scan for them before replying.</p>
+<ol><li><strong>Bit ranges and counts.</strong> A field <code>[11:6]</code> is 6 bits, not 5. n bits hold 2^n values, max 2^n - 1. log2 of a non-power-of-two is not a bit count; round up with ceil.</li><li><strong>Carry vs overflow.</strong> Carry-out flags unsigned overflow; signed overflow happens when both operands share a sign and the result's sign differs. They are independent.</li><li><strong>Sign extension.</strong> Loading a signed byte into a wider register replicates the MSB. <code>lb</code> vs <code>lbu</code> matters.</li><li><strong>Cache geometry.</strong> sets = size / (block × ways). Index bits come from sets, not lines. Fully associative has zero index bits.</li><li><strong>AMAT levels.</strong> Use local miss rates in the nested formula; global miss rate of L2 = L1 miss rate × L2 local miss rate.</li><li><strong>Load-use hazard.</strong> Classic 5-stage with full forwarding still needs one bubble after a load whose result the next instruction uses.</li><li><strong>Branch penalty</strong> depends on the stage that resolves the branch. State it.</li><li><strong>Iron law units.</strong> CPU time = IC × CPI × clock period. MIPS ignores instruction count differences between ISAs, so it cannot compare them.</li><li><strong>Amdahl.</strong> The fraction is of <em>execution time before</em> the improvement, not of instructions or code lines.</li><li><strong>Blocking vs nonblocking.</strong> Mixing <code>=</code> into clocked blocks creates simulation/synthesis mismatches and ordering bugs.</li><li><strong>Latches.</strong> A combinational block that fails to assign an output on some path infers a latch.</li><li><strong>CDC.</strong> One synchronizer per single-bit signal; multi-bit values need Gray code, a handshake, or an async FIFO. Never synchronize a bus bit by bit.</li><li><strong><code>volatile</code> is not atomic</strong> and is not a memory barrier across cores.</li><li><strong>C integer promotion.</strong> <code>uint8_t</code> operands promote to <code>int</code>; comparing signed and unsigned converts the signed side (<code>-1 &lt; 0u</code> is false).</li><li><strong>Shifts.</strong> Shifting by ≥ the type width, or left-shifting a negative signed value, is undefined in C.</li><li><strong>UART frame.</strong> 8N1 sends 10 bits per byte, so 115200 baud carries at most 11520 bytes/s.</li><li><strong>I2C needs pull-ups</strong>; lines are open-drain. SPI has four modes (CPOL, CPHA); both sides must match.</li><li><strong>Timer off-by-one.</strong> A counter from 0 to N has period N + 1 ticks. Prescaler registers often store (divide ratio − 1).</li><li><strong>Bandwidth units.</strong> 1 Gbps = 10^9 bits/s = 125 MB/s (decimal). 1 GiB = 2^30 bytes.</li><li><strong>Subnet hosts.</strong> Usable = 2^(32 − prefix) − 2 for prefixes up to /30; /31 has 2 (point-to-point), /32 has 1.</li><li><strong>Condition variables.</strong> Always wait in a <code>while</code> loop that re-checks the predicate (spurious wakeups, stolen wakeups).</li><li><strong>Scheduling metrics.</strong> Turnaround = completion − arrival; waiting = turnaround − burst; response = first run − arrival.</li></ol>
+<h3>5. Teaching mode</h3>
+<p>When the user is a student (homework, exam prep, "explain", "I don't get"), teach instead of dumping the answer:</p>
+<ol><li>One-sentence intuition: what problem this concept solves.</li><li>The formal rule or formula, with every symbol defined.</li><li>A worked example with small numbers, every step shown.</li><li>The common mistake for this topic and how to spot it.</li><li>One practice question with a similar shape, answer hidden behind "Try it, then check:" and the solution after.</li></ol>
+<p>For graded work, help them understand the method; don't just hand over a final answer to paste. If they're stuck on a specific step, fix that step.</p>
+<p>For exam prep, offer a compact "cheat sheet" of the formulas from the relevant reference file, and quiz them one question at a time.</p>
+<h3>6. Design and review mode</h3>
+<p>When the user is building something real (a CPU in an FPGA, firmware for a board, a cache simulator):</p>
+<ul><li>Ask for, or state assumptions about, the target: FPGA family or MCU part number, clock, toolchain, constraints.</li><li>Start from the interface and invariants, then the implementation.</li><li>Point to the datasheet or reference manual section they should verify (register names, electrical limits); part-specific details vary and you may not have them exactly right.</li><li>Review checklist for HDL: reset coverage, latch inference, CDC, width mismatches, combinational loops, timing-critical paths, testbench coverage of corner cases.</li><li>Review checklist for firmware: ISR length and shared data, stack size, watchdog, error paths, power-on state of pins, peripheral clock enables, race between init and first interrupt.</li></ul>
+<h3>7. Diagrams</h3>
+<p>Use plain ASCII for timing diagrams, pipeline charts, and datapaths when a picture beats prose. Pipeline example:</p>
+<pre><code>cycle      1   2   3   4   5   6   7
+lw  x1     IF  ID  EX  MEM WB
+add x2,x1      IF  ID  --  EX  MEM WB     &lt;- 1 bubble: load-use, forwarded MEM-&gt;EX</code></pre>
+<p>Timing example:</p>
+<pre><code>clk   _/‾\_/‾\_/‾\_/‾\_
+d     ==A===X==B=======
+q     ======A=====B====     (updates on rising edge, after t_clk-to-q)</code></pre>
+<h3>8. Templates</h3>
+<p>Fill these in when the user asks for a structured deliverable, or offer one when it would help. Copy the template, fill every section, and drop sections that don't apply.</p>
+<table><thead><tr><th>Template</th><th>Use it for</th></tr></thead><tbody><tr><td><code>assets/templates/design-review-checklist.md</code></td><td>reviewing an HDL design or firmware before it ships or gets graded</td></tr><tr><td><code>assets/templates/debug-log.md</code></td><td>a hardware or firmware bug hunt: symptom, hypotheses, measurements, fix</td></tr><tr><td><code>assets/templates/lab-report.md</code></td><td>digital logic, architecture, or embedded lab write-ups</td></tr><tr><td><code>assets/templates/formula-sheet.md</code></td><td>a one-page exam cheat sheet; keep only the formulas for the user's topics</td></tr><tr><td><code>assets/templates/hdl-templates.md</code></td><td>starting a synthesizable SystemVerilog module and its self-checking testbench</td></tr></tbody></table></section>
+<section><h2 id="s3"><span class="num">03</span>Reference: Digital Logic and HDL</h2>
+<p>Boolean algebra through synthesizable HDL: the rules, timing equations, and templates for designing and checking digital circuits.</p>
+<h3>Contents</h3>
+<ul><li>Boolean algebra</li><li>Combinational building blocks</li><li>Sequential logic</li><li>Finite state machines</li><li>Verilog / SystemVerilog rules</li><li>FPGA notes</li><li>Common mistakes</li></ul>
+<h3>Boolean algebra</h3>
+<ul><li>Identities: <code>A + A&#x27;B = A + B</code>, <code>A(A + B) = A</code>, <code>A + AB = A</code>, consensus <code>AB + A&#x27;C + BC = AB + A&#x27;C</code>.</li><li>De Morgan: <code>(AB)&#x27; = A&#x27; + B&#x27;</code>, <code>(A + B)&#x27; = A&#x27;B&#x27;</code>. NAND and NOR are each functionally complete.</li><li>XOR: <code>A ⊕ B = A&#x27;B + AB&#x27;</code>; parity of n bits = XOR of all bits; <code>A ⊕ A = 0</code>, <code>A ⊕ 0 = A</code>.</li><li>Canonical forms: SOP = OR of minterms Σm(...), POS = AND of maxterms ΠM(...). Minterm indices of F are the maxterm indices of F'.</li></ul>
+<h4>K-maps</h4>
+<ul><li>Rows/columns in Gray order (00, 01, 11, 10); edges wrap.</li><li>Groups are rectangles of size 2^k. Make groups as large as possible, use as few as possible. Every 1 covered at least once.</li><li>Don't-cares (X) may join groups but never need covering.</li><li>Essential prime implicant: the only group covering some 1. Take those first.</li><li>Hazards: a static-1 hazard exists when two adjacent 1s are covered by different groups with no group spanning both. Add the consensus term to remove it (only matters in asynchronous logic or glitch-sensitive outputs).</li></ul>
+<h3>Combinational building blocks</h3>
+<table><thead><tr><th>Block</th><th>Notes</th></tr></thead><tbody><tr><td>2^n:1 mux</td><td>n select lines. Any n-input function fits in a 2^n:1 mux (inputs tied to 0/1), or in a 2^(n−1):1 mux with the last variable fed to data inputs as 0, 1, x, x'.</td></tr><tr><td>n:2^n decoder</td><td>One-hot outputs; with an OR gate per output it implements any SOP.</td></tr><tr><td>Priority encoder</td><td>Output index of highest-priority active input plus a valid bit.</td></tr><tr><td>Ripple-carry adder</td><td>n full adders. Delay O(n): about 2n gate delays on the carry chain.</td></tr><tr><td>Carry-lookahead</td><td>g = ab, p = a ⊕ b (or a + b); <code>c(i+1) = g(i) + p(i)c(i)</code>. Delay O(log n) with a tree.</td></tr><tr><td>Carry-select</td><td>Compute both carry-in cases, mux on real carry.</td></tr><tr><td>Subtractor</td><td><code>A − B = A + B&#x27; + 1</code>: invert B, set carry-in to 1.</td></tr><tr><td>Comparator</td><td>Equality: XNOR per bit then AND. Magnitude: subtract and check sign/carry (unsigned: borrow = NOT carry-out).</td></tr></tbody></table>
+<p>Full adder: <code>s = a ⊕ b ⊕ cin</code>, <code>cout = ab + cin(a ⊕ b)</code>.</p>
+<p>Overflow in two's complement addition: <code>V = c(n) ⊕ c(n−1)</code> (carry into MSB XOR carry out of MSB).</p>
+<h3>Sequential logic</h3>
+<ul><li><strong>Latch</strong>: level-sensitive (transparent while enable is active). <strong>Flip-flop</strong>: edge-triggered.</li><li>D FF: <code>Q+ = D</code>. JK: <code>Q+ = JQ&#x27; + K&#x27;Q</code>. T: <code>Q+ = T ⊕ Q</code>. SR latch with S = R = 1 is invalid (NOR form).</li><li>Registers, shift registers, counters (binary, ring = one-hot rotating, Johnson = inverted feedback, 2n states from n FFs).</li></ul>
+<h4>Timing</h4>
+<p>Parameters: <code>t_cq</code> (clock-to-Q), <code>t_pd</code> (max combinational delay), <code>t_cd</code> (min/contamination delay), <code>t_setup</code>, <code>t_hold</code>, <code>t_skew</code>.</p>
+<ul><li>Setup (max delay): <code>T_clk ≥ t_cq + t_pd + t_setup (+ t_skew if the capture clock arrives early)</code>. So <code>f_max = 1 / (t_cq + t_pd + t_setup)</code>.</li><li>Hold (min delay): <code>t_cq(min) + t_cd ≥ t_hold (+ t_skew if the capture clock arrives late)</code>. Hold does not depend on the clock period; lowering the frequency does not fix a hold violation. Add delay on the short path instead.</li><li>Critical path: the longest register-to-register path. Pipelining splits it and raises f_max at the cost of latency and register overhead.</li></ul>
+<p>Worked example: <code>t_cq = 50 ps</code>, longest logic 400 ps, <code>t_setup = 30 ps</code> → <code>T_min = 480 ps</code> → <code>f_max ≈ 2.08 GHz</code>.</p>
+<h4>Metastability and clock domain crossing (CDC)</h4>
+<ul><li>A flop sampling an asynchronous input can go metastable. A 2-flop synchronizer gives it a full cycle to resolve; MTBF grows exponentially with resolve time (<code>MTBF = e^(t_r/τ) / (T_0 · f_clk · f_data)</code>).</li><li>Single-bit level signal: 2-FF (or 3-FF at high speed) synchronizer in the destination domain.</li><li>Single-cycle pulse into a slower domain: convert to a toggle, synchronize, edge-detect. Or use a handshake.</li><li>Multi-bit data: never synchronize bits independently (they can arrive in different cycles). Use Gray-coded counters (only one bit changes per step), a req/ack handshake with data held stable, or an asynchronous FIFO (Gray-coded pointers synchronized across).</li><li>Asynchronous reset: assert asynchronously, <strong>deassert synchronously</strong> (reset synchronizer), or flops may leave reset on different cycles.</li></ul>
+<h3>Finite state machines</h3>
+<ul><li><strong>Moore</strong>: outputs depend only on state (glitch-free, one cycle later). <strong>Mealy</strong>: outputs depend on state and inputs (fewer states, faster reaction, can glitch).</li><li>Design steps: state diagram → state table → encoding → next-state and output equations (K-maps) → circuit. Check every state handles every input combination.</li><li>Encodings: binary (⌈log2 N⌉ FFs), one-hot (N FFs, simple fast next-state logic, common on FPGAs), Gray (one bit changes per transition in sequential FSMs).</li><li>Sequence detectors: decide overlapping vs non-overlapping before drawing states. "1011" overlapping needs 4 states in Mealy form, 5 in Moore.</li><li>Unused states: send them to reset/idle for safety.</li></ul>
+<h3>Verilog / SystemVerilog rules</h3>
+<ol><li>Sequential logic: <code>always_ff @(posedge clk)</code> with nonblocking <code>&lt;=</code>. Combinational: <code>always_comb</code> with blocking <code>=</code>.</li><li>In <code>always_comb</code>, assign every output on every path. Put defaults at the top. Otherwise a latch is inferred.</li><li><code>case</code> inside <code>always_comb</code>: add a <code>default</code>. Use <code>unique case</code> / <code>priority case</code> only when you mean it.</li><li>Declare explicit widths: <code>8&#x27;d5</code>, <code>4&#x27;b1010</code>. Unsized constants are 32 bits. Watch width truncation warnings.</li><li>Arithmetic is unsigned unless <em>all</em> operands are <code>signed</code>. Use <code>$signed()</code> deliberately.</li><li>Do not drive one signal from two <code>always</code> blocks.</li><li><code>#delay</code>, <code>initial</code> (for ASIC), <code>$display</code>, and <code>forever</code> do not synthesize. FPGA tools do accept <code>initial</code> for register init values.</li><li>Use <code>logic</code> in SystemVerilog instead of choosing between <code>wire</code> and <code>reg</code>.</li><li>Avoid combinational loops and gated clocks; use clock enables.</li><li>Parameterize widths (<code>parameter int W = 8</code>) and use <code>generate</code> for replication.</li></ol>
+<h4>FSM template (SystemVerilog)</h4>
+<pre><code>module seq_1011 (
+  input  logic clk, rst_n, din,
+  output logic hit           // Moore: high for one cycle after &quot;1011&quot; (overlapping)
+);
+  typedef enum logic [2:0] {S0, S1, S10, S101, S1011} state_t;
+  state_t state, next;
+
+  always_ff @(posedge clk or negedge rst_n)
+    if (!rst_n) state &lt;= S0;
+    else        state &lt;= next;
+
+  always_comb begin
+    next = state;                       // default: hold (prevents latches)
+    unique case (state)
+      S0:    next = din ? S1    : S0;
+      S1:    next = din ? S1    : S10;
+      S10:   next = din ? S101  : S0;
+      S101:  next = din ? S1011 : S10;
+      S1011: next = din ? S1    : S10;  // overlap: &quot;1&quot; or &quot;10&quot; suffix reused
+      default: next = S0;
+    endcase
+  end
+
+  assign hit = (state == S1011);
+endmodule</code></pre>
+<h4>Self-checking testbench skeleton</h4>
+<pre><code>module tb;
+  logic clk = 0, rst_n = 0, din = 0, hit;
+  seq_1011 dut (.*);
+  always #5 clk = ~clk;
+
+  task automatic send(input logic b); din = b; @(posedge clk); #1; endtask
+
+  initial begin
+    repeat (2) @(posedge clk); rst_n = 1;
+    send(1); send(0); send(1); send(1);
+    assert (hit) else $error(&quot;missed first 1011&quot;);
+    send(0); send(1); send(1);
+    assert (hit) else $error(&quot;missed overlapping 1011&quot;);
+    $display(&quot;done&quot;); $finish;
+  end
+endmodule</code></pre>
+<h4>VHDL reminders</h4>
+<ul><li>Clocked process: <code>if rising_edge(clk) then ... end if;</code>. Signals update at process end; variables update immediately.</li><li>Use <code>numeric_std</code> (<code>unsigned</code>, <code>signed</code>), never <code>std_logic_arith</code>.</li><li>Combinational process: complete sensitivity list (or <code>process(all)</code> in VHDL-2008) and assign all outputs.</li></ul>
+<h3>FPGA notes</h3>
+<ul><li>LUT-based: a k-input LUT (k = 4 to 6) implements any k-input function in one level.</li><li>Block RAM is usually synchronous read: data appears one cycle after the address. Write HDL that matches the template so the tool infers BRAM.</li><li>DSP slices do multiply-accumulate; pipeline registers around them reach higher f_max.</li><li>Always write timing constraints (clock period, I/O delays); read the timing report for negative slack.</li></ul>
+<h3>Common mistakes</h3>
+<ul><li>Counting states vs flip-flops: N states need ⌈log2 N⌉ flip-flops in binary encoding.</li><li>Forgetting that a Moore output lags the input by a cycle.</li><li>Using <code>&lt;=</code> in combinational blocks (works in simple cases, confuses readers, breaks with intermediate variables).</li><li>Believing a lower clock fixes hold violations.</li><li>Synchronizing a counter bus with per-bit 2-FF synchronizers.</li><li>Assuming simulation equals hardware when there are latches, uninitialized regs (X), or missing constraints.</li></ul></section>
+<section><h2 id="s4"><span class="num">04</span>Reference: Computer Architecture</h2>
+<p>Performance math, ISAs, pipelines, caches, virtual memory, and multicore, with the formulas and stall rules exam problems depend on.</p>
+<h3>Contents</h3>
+<ul><li>Performance</li><li>ISA basics</li><li>Pipelining</li><li>Memory hierarchy</li><li>Virtual memory</li><li>Multicore</li><li>Storage and I/O (brief)</li><li>Common mistakes</li></ul>
+<h3>Performance</h3>
+<ul><li><strong>Iron law</strong>: <code>CPU time = IC × CPI × T_clk = IC × CPI / f</code>.</li><li>CPI from a mix: <code>CPI = Σ (fraction_i × CPI_i)</code>. IPC = 1 / CPI.</li><li>Speedup of B over A: <code>time_A / time_B</code>. "X% faster" means <code>time_A / time_B = 1 + X/100</code>.</li><li>MIPS = <code>f / (CPI × 10^6)</code>. Useless across ISAs (different IC for the same program).</li><li><strong>Amdahl</strong>: <code>S = 1 / ((1 − p) + p / s)</code>, where p is the fraction of the <em>original execution time</em> that is improved. Limit as s → ∞ is <code>1 / (1 − p)</code>.</li><li><strong>Gustafson</strong> (scaled workload): <code>S = (1 − p) + p·N</code>. Use when the problem grows with N processors.</li><li>Power: dynamic <code>P = α C V² f</code>. Lowering V and f together cuts power roughly with the cube.</li><li>Benchmarks: summarize ratios with the geometric mean (SPEC), times with the arithmetic mean.</li></ul>
+<p>Calculator: <code>cecalc.py cpu</code>, <code>cecalc.py amdahl</code>.</p>
+<h3>ISA basics</h3>
+<ul><li>RISC: fixed-length instructions, load/store, many registers (RISC-V, ARM, MIPS). CISC: variable length, memory operands (x86; decoded internally into micro-ops).</li><li>Addressing modes: immediate, register, base + displacement, PC-relative, indexed.</li></ul>
+<h4>RISC-V (RV32I) quick reference</h4>
+<table><thead><tr><th>Format</th><th>Fields (bit 31 → 0)</th><th>Examples</th></tr></thead><tbody><tr><td>R</td><td>funct7 · rs2 · rs1 · funct3 · rd · opcode</td><td>add, sub, and, sll</td></tr><tr><td>I</td><td>imm[11:0] · rs1 · funct3 · rd · opcode</td><td>addi, lw, jalr</td></tr><tr><td>S</td><td>imm[11:5] · rs2 · rs1 · funct3 · imm[4:0] · opcode</td><td>sw, sb</td></tr><tr><td>B</td><td>imm[12|10:5] · rs2 · rs1 · funct3 · imm[4:1|11] · opcode</td><td>beq, blt</td></tr><tr><td>U</td><td>imm[31:12] · rd · opcode</td><td>lui, auipc</td></tr><tr><td>J</td><td>imm[20|10:1|11|19:12] · rd · opcode</td><td>jal</td></tr></tbody></table>
+<ul><li>32 registers, <code>x0</code> hardwired to 0. Immediates are sign-extended. B and J offsets are in multiples of 2 bytes (bit 0 implied 0).</li><li>Loading a 32-bit constant: <code>lui rd, hi20</code> + <code>addi rd, rd, lo12</code>. If lo12 is negative as a signed 12-bit value, add 1 to hi20 first (<code>hi20 = (C + 0x800) &gt;&gt; 12</code>).</li><li>ABI: <code>ra</code>=x1, <code>sp</code>=x2, <code>a0–a7</code> args/returns (x10–x17), <code>t0–t6</code> caller-saved temps, <code>s0–s11</code> callee-saved (s0 = frame pointer). Stack grows down, 16-byte aligned.</li><li>MIPS equivalents: <code>$zero</code>, <code>$ra</code>, <code>$sp</code>, <code>$a0–$a3</code>, <code>$v0–$v1</code>, <code>$t0–$t9</code>, <code>$s0–$s7</code>; branch delay slot in classic MIPS.</li></ul>
+<h3>Pipelining</h3>
+<p>Classic 5-stage: IF → ID → EX → MEM → WB. Ideal CPI = 1; speedup over single-cycle is at most the number of stages (less with unbalanced stages and register overhead).</p>
+<p>Pipelined clock period = slowest stage + pipeline register overhead.</p>
+<h4>Hazards</h4>
+<table><thead><tr><th>Hazard</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td>Structural</td><td>Two instructions need one resource</td><td>Duplicate resource (separate I/D caches), stall</td></tr><tr><td>Data RAW</td><td>Read before earlier write completes</td><td>Forwarding (EX→EX, MEM→EX); stall when forwarding can't help</td></tr><tr><td>Data WAR/WAW</td><td>Only in out-of-order or multi-cycle pipelines</td><td>Register renaming</td></tr><tr><td>Control</td><td>Next PC unknown until branch resolves</td><td>Predict, resolve earlier, delay slot (MIPS)</td></tr></tbody></table>
+<p>Rules for the classic 5-stage pipeline (register file writes in the first half of the cycle, reads in the second):</p>
+<ul><li><strong>No forwarding</strong>: a dependent instruction right after the producer stalls 2 cycles (it can read in the cycle the producer writes back).</li><li><strong>Full forwarding</strong>: ALU → ALU dependences need 0 stalls. <strong>Load-use</strong> needs 1 stall.</li><li>Branch resolved in EX with predict-not-taken: taken branch costs 2 cycles. Resolved in ID: 1 cycle (needs a comparator in ID, may add a data stall).</li></ul>
+<p><code>CPI = 1 + stall cycles per instruction</code>. Example: 20% loads, half followed by a dependent use (1 stall), 15% branches, 60% taken, 2-cycle penalty: <code>CPI = 1 + 0.2·0.5·1 + 0.15·0.6·2 = 1.28</code>.</p>
+<p>Drawing a pipeline diagram (always do this for hazard questions):</p>
+<pre><code>cycle        1   2   3   4   5   6   7   8
+lw  x1,0(x2) IF  ID  EX  MEM WB
+add x3,x1,x4     IF  ID  --  EX  MEM WB          load-use: 1 bubble
+sub x5,x3,x6         IF  --  ID  EX  MEM WB      EX→EX forward, no stall</code></pre>
+<h4>Branch prediction</h4>
+<ul><li>Static: always not taken; backward-taken/forward-not-taken (loops).</li><li>1-bit: mispredicts twice per loop execution (exit and re-entry).</li><li>2-bit saturating counter: states strongly/weakly taken/not-taken; mispredicts once per loop exit.</li><li>Correlating / gshare: global history XOR PC indexes a table of 2-bit counters.</li><li>BTB caches target addresses so a predicted-taken branch redirects fetch in IF. Return address stack predicts <code>ret</code>.</li><li>Misprediction cost grows with pipeline depth.</li></ul>
+<h4>Beyond scalar in-order</h4>
+<ul><li>Superscalar: issue width w, ideal CPI = 1/w.</li><li>Out-of-order: Tomasulo (reservation stations, CDB broadcast), register renaming removes WAR/WAW, reorder buffer (ROB) commits in order for precise exceptions.</li><li>Speculation squashes wrong-path work, but microarchitectural state (caches) can leak it (Spectre).</li><li>VLIW: compiler schedules parallel operations. SIMD/vector: one instruction, many data elements. GPU: SIMT, warps of 32 threads; divergence serializes paths.</li><li>Multithreading: fine-grained, coarse-grained, simultaneous (SMT/Hyper-Threading).</li></ul>
+<h3>Memory hierarchy</h3>
+<p>Locality: temporal (reuse soon) and spatial (neighbors soon).</p>
+<h4>Cache organization</h4>
+<p>For byte-addressed memory with address width A:</p>
+<pre><code>offset bits = log2(block size in bytes)
+sets        = cache size / (block size × ways)
+index bits  = log2(sets)
+tag bits    = A − index − offset</code></pre>
+<p>Direct-mapped: 1 way. Fully associative: 1 set, 0 index bits. Storage per line: data + tag + valid (+ dirty for write-back, + LRU bits).</p>
+<p>Calculator: <code>cecalc.py cache --size 32KiB --block 64 --assoc 8 --addr-bits 32</code> and add <code>--trace ...</code> to simulate an access sequence with LRU or FIFO and classify misses.</p>
+<h4>Misses: the 3 Cs (+1)</h4>
+<ul><li><strong>Compulsory</strong>: first access to a block (infinite cache would still miss).</li><li><strong>Capacity</strong>: the working set exceeds the cache (a fully associative cache of the same size would also miss).</li><li><strong>Conflict</strong>: too many blocks map to one set (fully associative would hit).</li><li><strong>Coherence</strong>: invalidated by another core.</li></ul>
+<p>Bigger blocks cut compulsory misses (spatial locality) but raise miss penalty and can raise conflict misses in small caches. More associativity cuts conflict misses but can lengthen hit time.</p>
+<h4>Policies</h4>
+<ul><li>Write-through (every write goes to next level, usually with a write buffer) vs write-back (dirty bit, write on eviction).</li><li>Write-allocate (fetch block on write miss; pairs with write-back) vs no-write-allocate (pairs with write-through).</li><li>Replacement: LRU (exact is costly beyond 4–8 ways), pseudo-LRU (tree), FIFO, random.</li></ul>
+<h4>AMAT</h4>
+<p><code>AMAT = hit time + miss rate × miss penalty</code>. Multi-level with <strong>local</strong> miss rates:</p>
+<pre><code>AMAT = HT_L1 + MR_L1 × (HT_L2 + MR_L2 × (HT_L3 + MR_L3 × T_mem))</code></pre>
+<p>Global miss rate of L2 = <code>MR_L1 × MR_L2(local)</code>. Memory stall cycles per instruction = <code>(memory accesses/instr) × miss rate × miss penalty</code>; add to base CPI. Remember instruction fetches are memory accesses too (1 per instruction).</p>
+<p>Calculator: <code>cecalc.py amat --levels 1:0.05 10:0.2 --mem 100</code>.</p>
+<h4>Optimizations</h4>
+<p>Loop interchange (walk arrays in storage order; C is row-major), blocking/tiling for matrix multiply, prefetching, victim caches, non-blocking caches (hit under miss), critical word first, way prediction.</p>
+<h3>Virtual memory</h3>
+<pre><code>page offset bits = log2(page size)
+VPN bits         = VA bits − offset bits
+PFN bits         = PA bits − offset bits
+flat table size  = 2^VPN × PTE size</code></pre>
+<ul><li>Multi-level page tables save space for sparse address spaces. Levels needed when each table fits in one page: <code>ceil(VPN bits / log2(page size / PTE size))</code>. x86-64 with 4 KiB pages: 48-bit VA = 9+9+9+9+12 (4 levels).</li><li>TLB caches translations. TLB reach = entries × page size. Huge pages raise reach.</li><li>Effective access time with TLB (1-level table): <code>EAT = TLB time + mem time + TLB miss rate × mem time</code> (page walk adds one memory access per level on a miss).</li><li>Page fault: OS loads the page from disk, updates the PTE, restarts the instruction. Costs millions of cycles.</li><li><strong>VIPT</strong> (virtually indexed, physically tagged) L1 avoids aliasing when index + offset bits ≤ page offset bits, i.e. <code>cache size / ways ≤ page size</code>. That is why many L1s are 32 KiB 8-way with 4 KiB pages.</li></ul>
+<p>Calculator: <code>cecalc.py vm --va-bits 48 --page 4KiB --pte 8 --tlb 64</code>.</p>
+<h3>Multicore</h3>
+<h4>Coherence</h4>
+<ul><li>Problem: private caches hold stale copies. Invariant: single writer or multiple readers per block.</li><li><strong>MSI</strong>: Modified, Shared, Invalid. <strong>MESI</strong> adds Exclusive (clean, sole copy: write without a bus transaction). <strong>MOESI</strong> adds Owned (dirty, shared; supplies data).</li><li>Snooping (broadcast on a shared bus; scales poorly) vs directory (tracks sharers per block; scales).</li><li><strong>False sharing</strong>: independent variables on the same cache line ping-pong between cores. Pad or align to the line size (usually 64 B).</li></ul>
+<h4>Memory consistency</h4>
+<ul><li>Sequential consistency: all cores see one interleaving respecting program order. Simple, slow.</li><li>x86-TSO: stores can be delayed past later loads (store buffer). ARM and RISC-V (RVWMO) are weaker: most reorderings allowed.</li><li>Fences / acquire-release atomics restore ordering. In C/C++ use <code>&lt;stdatomic.h&gt;</code> / <code>std::atomic</code>, not <code>volatile</code>.</li><li>Synchronization primitives: test-and-set, compare-and-swap, load-reserved/store-conditional (LR/SC).</li></ul>
+<h3>Storage and I/O (brief)</h3>
+<ul><li>Disk access time = seek + rotational latency (half a rotation on average: 60/(2·RPM) s) + transfer + controller.</li><li>RAID 0 (striping), 1 (mirroring), 5 (distributed parity, survives 1 disk), 6 (survives 2).</li><li>I/O methods: polling, interrupts, DMA.</li></ul>
+<h3>Common mistakes</h3>
+<ul><li>Using lines instead of sets for index bits.</li><li>Forgetting that miss penalty in AMAT is the <em>next level's</em> AMAT, not raw memory time, in multi-level hierarchies.</li><li>Mixing global and local miss rates in the nested formula.</li><li>Treating a pipeline's latency as its throughput; one instruction still takes 5 cycles, but one completes per cycle.</li><li>Counting the load-use stall when the consumer is two instructions after the load (no stall with forwarding).</li><li>Applying Amdahl's p to instruction counts instead of time.</li></ul></section>
+<section><h2 id="s5"><span class="num">05</span>Reference: Low-Level Programming</h2>
+<p>How numbers live in bits, where C bites, and how assembly and linking work underneath.</p>
+<h3>Contents</h3>
+<ul><li>Integer representation</li><li>IEEE 754</li><li>Bit manipulation (C)</li><li>C pitfalls and undefined behavior</li><li>Assembly and calling conventions</li><li>Build pipeline</li><li>Tooling</li><li>Common mistakes</li></ul>
+<h3>Integer representation</h3>
+<table><thead><tr><th>n-bit</th><th>Range</th></tr></thead><tbody><tr><td>unsigned</td><td>0 … 2^n − 1</td></tr><tr><td>two's complement</td><td>−2^(n−1) … 2^(n−1) − 1</td></tr><tr><td>sign-magnitude, ones' complement</td><td>−(2^(n−1) − 1) … 2^(n−1) − 1 (two zeros)</td></tr></tbody></table>
+<ul><li>Negate in two's complement: invert all bits, add 1. The most negative value negates to itself.</li><li>Sign extension replicates the MSB; zero extension fills with 0.</li><li>Unsigned overflow = carry out of the MSB. Signed overflow = operands with equal signs produce a result with a different sign.</li><li>Hex digit = 4 bits, octal digit = 3 bits. Powers: 2^10 = 1024, 2^16 = 65 536, 2^20 ≈ 1.05 M, 2^32 ≈ 4.29 G.</li><li><strong>Endianness</strong>: little-endian stores the least significant byte at the lowest address (x86, most ARM and RISC-V configurations). Big-endian stores the MSB first (network byte order). 0x12345678 at address 0 in little-endian: bytes 78 56 34 12.</li><li>BCD: each decimal digit in 4 bits. Gray code: <code>g = b ^ (b &gt;&gt; 1)</code>.</li></ul>
+<p>Calculator: <code>cecalc.py conv VALUE --bits N</code>.</p>
+<h3>IEEE 754</h3>
+<table><thead><tr><th></th><th>sign</th><th>exponent</th><th>fraction</th><th>bias</th></tr></thead><tbody><tr><td>half (binary16)</td><td>1</td><td>5</td><td>10</td><td>15</td></tr><tr><td>single (binary32)</td><td>1</td><td>8</td><td>23</td><td>127</td></tr><tr><td>double (binary64)</td><td>1</td><td>11</td><td>52</td><td>1023</td></tr></tbody></table>
+<ul><li>Normal: <code>(−1)^s × 1.f × 2^(e − bias)</code>, stored exponent 1 … max−1.</li><li>Exponent 0: zero (f = 0) or subnormal <code>0.f × 2^(1 − bias)</code> (gradual underflow).</li><li>Exponent all ones: infinity (f = 0) or NaN (f ≠ 0). NaN ≠ NaN.</li><li>Encoding by hand: convert to binary, normalize to 1.xxx × 2^E, stored exponent = E + bias, drop the leading 1, round the fraction to nearest-even.</li><li>0.1, 0.2, 0.3 are not exactly representable; <code>0.1 + 0.2 != 0.3</code> in double. Compare with a tolerance.</li><li>Single precision: about 7 decimal digits; integers exact up to 2^24. Double: about 15–16 digits; integers exact up to 2^53.</li><li>Floating-point addition is not associative.</li></ul>
+<p>Calculator: <code>cecalc.py float 0.1</code>, <code>cecalc.py float 0x3F800000 --hex</code>.</p>
+<h3>Bit manipulation (C)</h3>
+<pre><code>x |=  (1u &lt;&lt; n);            // set bit n
+x &amp;= ~(1u &lt;&lt; n);            // clear bit n
+x ^=  (1u &lt;&lt; n);            // toggle bit n
+(x &gt;&gt; n) &amp; 1u               // test bit n
+(x &gt;&gt; lo) &amp; ((1u &lt;&lt; w) - 1) // extract w-bit field starting at lo
+x = (x &amp; ~(mask &lt;&lt; lo)) | ((v &amp; mask) &lt;&lt; lo);  // insert field
+x &amp; (x - 1)                 // clear lowest set bit; == 0 iff x is 0 or a power of two
+x &amp; -x                      // isolate lowest set bit (unsigned x)
+(x + a - 1) &amp; ~(a - 1)      // round up to multiple of a (a = power of two)
+__builtin_popcount(x), __builtin_ctz(x), __builtin_clz(x)   // GCC/Clang; ctz/clz undefined for 0</code></pre>
+<p>Use <code>1u</code> or <code>UINT32_C(1)</code>, not <code>1</code>: <code>1 &lt;&lt; 31</code> overflows a signed int.</p>
+<h3>C pitfalls and undefined behavior</h3>
+<p>Undefined behavior (the compiler may assume it never happens and optimize accordingly):</p>
+<ul><li>signed integer overflow</li><li>shift count negative or ≥ width of the (promoted) type; left-shifting a negative value</li><li>out-of-bounds array access, including forming a pointer more than one past the end</li><li>dereferencing null, dangling, or misaligned pointers</li><li>reading uninitialized automatic variables</li><li>strict aliasing violations (accessing an object through an incompatible pointer type; use <code>memcpy</code> or <code>unsigned char*</code>)</li><li>data races between threads</li><li>modifying a string literal; modifying an object twice without a sequence point (<code>i = i++</code>)</li></ul>
+<p>Conversions:</p>
+<ul><li><strong>Integer promotion</strong>: <code>char</code>, <code>short</code>, <code>uint8_t</code>, <code>uint16_t</code> become <code>int</code> in arithmetic. <code>uint8_t a = 200, b = 100; a + b</code> is 300 (int), not 44.</li><li><strong>Usual arithmetic conversions</strong>: mixing signed and unsigned of the same rank converts to unsigned. <code>-1 &lt; 0u</code> is false. <code>for (unsigned i = n - 1; i &gt;= 0; i--)</code> never ends.</li><li><code>sizeof</code> returns <code>size_t</code> (unsigned).</li><li><code>char</code> signedness is implementation-defined.</li></ul>
+<p>Structs: members are aligned to their natural alignment; padding is inserted. <code>struct { char c; int i; char d; }</code> is typically 12 bytes; reorder largest-first to shrink it. Bit-field layout is implementation-defined; do not use bit-fields to map hardware registers portably.</p>
+<p>Qualifiers:</p>
+<ul><li><code>volatile</code>: every access happens, in order, as written. Needed for memory-mapped registers and variables changed by ISRs or signal handlers. Not atomic, no inter-core ordering.</li><li><code>const volatile</code>: read-only register the hardware changes (status register).</li><li><code>restrict</code>: promise of no aliasing, enables optimization.</li></ul>
+<p>Memory layout of a process: <code>.text</code> (code), <code>.rodata</code> (constants), <code>.data</code> (initialized globals), <code>.bss</code> (zero-initialized globals), heap (grows up), stack (grows down).</p>
+<h3>Assembly and calling conventions</h3>
+<table><thead><tr><th>ABI</th><th>Args</th><th>Return</th><th>Callee-saved</th><th>Notes</th></tr></thead><tbody><tr><td>RISC-V</td><td>a0–a7</td><td>a0, a1</td><td>s0–s11, sp</td><td>ra holds return address</td></tr><tr><td>ARM32 AAPCS</td><td>r0–r3</td><td>r0, r1</td><td>r4–r11, sp</td><td>lr = r14, pc = r15; 8-byte stack alignment at calls</td></tr><tr><td>AArch64</td><td>x0–x7</td><td>x0</td><td>x19–x28, sp</td><td>x29 = FP, x30 = LR; 16-byte stack alignment</td></tr><tr><td>x86-64 System V</td><td>rdi, rsi, rdx, rcx, r8, r9</td><td>rax (rdx:rax)</td><td>rbx, rbp, r12–r15</td><td>rsp 16-byte aligned before <code>call</code>; 128-byte red zone</td></tr><tr><td>x86-64 Windows</td><td>rcx, rdx, r8, r9</td><td>rax</td><td>rbx, rbp, rdi, rsi, r12–r15</td><td>32-byte shadow space</td></tr></tbody></table>
+<p>Function prologue/epilogue in RISC-V:</p>
+<pre><code># int sum(int *a, int n): returns a[0] + ... + a[n-1]
+sum:
+    li   t0, 0          # t0 = total
+    beqz a1, done       # n == 0 -&gt; return 0
+loop:
+    lw   t1, 0(a0)      # t1 = *a
+    add  t0, t0, t1     # total += *a
+    addi a0, a0, 4      # a++ (int is 4 bytes)
+    addi a1, a1, -1     # n--
+    bnez a1, loop
+done:
+    mv   a0, t0         # return value in a0
+    ret                 # jalr x0, 0(ra)</code></pre>
+<p>A leaf function that uses only temporaries needs no stack frame. A non-leaf must save <code>ra</code> (and any <code>s</code> registers it uses) on the stack:</p>
+<pre><code>    addi sp, sp, -16
+    sw   ra, 12(sp)
+    sw   s0, 8(sp)
+    ...
+    lw   s0, 8(sp)
+    lw   ra, 12(sp)
+    addi sp, sp, 16
+    ret</code></pre>
+<p>Recursion questions: draw the stack frames, one per active call, with saved <code>ra</code> and locals.</p>
+<h3>Build pipeline</h3>
+<p><code>preprocess (cpp) → compile (cc1) → assemble (as) → link (ld)</code></p>
+<ul><li>Object files hold sections and a symbol table with relocations. <code>nm</code> lists symbols, <code>objdump -d</code> disassembles, <code>readelf -a</code> dumps ELF headers.</li><li>"undefined reference" = linker error (missing definition or library). "implicit declaration" = compiler warning (missing prototype; treat as an error).</li><li>Static linking copies code into the executable. Dynamic linking resolves at load/run time through the PLT/GOT.</li><li>Embedded targets use a linker script to place <code>.text</code> in flash and <code>.data</code>/<code>.bss</code> in RAM.</li></ul>
+<h3>Tooling</h3>
+<ul><li>Compile with warnings: <code>-Wall -Wextra -Wconversion -Wshadow</code>.</li><li>Sanitizers on a host build: <code>-fsanitize=address,undefined -g</code>.</li><li><code>gdb</code>: <code>break</code>, <code>run</code>, <code>next</code>, <code>step</code>, <code>bt</code>, <code>info registers</code>, <code>x/16xw addr</code>, <code>watch var</code>.</li><li>Valgrind (memcheck) for leaks and invalid accesses.</li><li>Compiler Explorer (godbolt.org) to see what the compiler emits at each optimization level.</li></ul>
+<h3>Common mistakes</h3>
+<ul><li><code>int</code> assumed to be 32 bits on every platform (it is 16 on AVR). Use <code>&lt;stdint.h&gt;</code>.</li><li>Printing <code>size_t</code> with <code>%d</code> (use <code>%zu</code>), <code>uint32_t</code> with <code>%u</code> on platforms where it is <code>unsigned long</code> (use <code>PRIu32</code>).</li><li>Returning a pointer to a local variable.</li><li>Off-by-one in <code>malloc(strlen(s))</code> (needs + 1 for the terminator).</li><li>Treating <code>sizeof(array)</code> inside a function as the array size (it is the pointer size).</li></ul></section>
+<section><h2 id="s6"><span class="num">06</span>Reference: Embedded Systems</h2>
+<p>Microcontroller firmware from reset vector to RTOS, with the bus, timer, and ADC details that cause most bugs.</p>
+<p>Part-specific details (register names, bit positions, electrical limits) vary between vendors and even between chips in one family. Give the general mechanism, then tell the user which reference-manual or datasheet section to confirm.</p>
+<h3>Contents</h3>
+<ul><li>Microcontroller anatomy</li><li>GPIO</li><li>Interrupts</li><li>Timers and PWM</li><li>Serial buses</li><li>ADC and DAC</li><li>DMA</li><li>RTOS concepts</li><li>Low power</li><li>Debugging firmware</li><li>Firmware bug checklist</li></ul>
+<h3>Microcontroller anatomy</h3>
+<ul><li>CPU core (Cortex-M0/M3/M4/M7, RISC-V, AVR), flash (code, constants), SRAM (data, stack, heap), memory-mapped peripherals, clock tree (internal RC, external crystal, PLL), reset and power management.</li><li>Peripherals only work once their <strong>clock is enabled</strong> (e.g. STM32 <code>RCC-&gt;AHB1ENR</code>). Forgetting this is the most common "register writes do nothing" bug.</li><li>Memory-mapped I/O in C:</li></ul>
+<pre><code>#define GPIOA_ODR (*(volatile uint32_t *)0x40020014u)
+GPIOA_ODR |= (1u &lt;&lt; 5);   // read-modify-write; not atomic if an ISR also writes it</code></pre>
+<p>Prefer atomic set/reset registers when the part has them (STM32 <code>BSRR</code>, AVR <code>PINx</code> write-to-toggle).</p>
+<h4>Startup sequence (bare metal)</h4>
+<ol><li>Reset: the core loads the initial SP and the reset handler address from the vector table (Cortex-M: words 0 and 1).</li><li>Reset handler copies <code>.data</code> initial values from flash to RAM, zeroes <code>.bss</code>, optionally sets up clocks and the FPU.</li><li>Calls C++ static constructors (if any), then <code>main()</code>.</li><li><code>main</code> must never return on bare metal; end with an infinite loop.</li></ol>
+<h3>GPIO</h3>
+<ul><li>Modes: input (floating, pull-up, pull-down), output push-pull, output open-drain, alternate function, analog.</li><li><strong>Push-pull</strong> drives both high and low. <strong>Open-drain</strong> only pulls low; needs a pull-up; lets several devices share a line (I2C, wired-AND interrupts).</li><li>Floating inputs pick up noise; always pull or drive unused inputs.</li><li>Pin current limits are per pin and per port (often ~20 mA per pin, less in total). Use a transistor for loads beyond that.</li><li><strong>Debouncing</strong> mechanical switches: bounce lasts about 1–20 ms. Debounce in software (sample every 5–10 ms, accept after N stable samples) or with RC + Schmitt trigger.</li></ul>
+<h3>Interrupts</h3>
+<p>Rules for ISRs:</p>
+<ol><li>Keep them short: clear the flag, move data, set a flag or push to a queue, return. Do the work in the main loop or a task.</li><li>Share data through <code>volatile</code> variables. For multi-byte data on an 8-bit MCU, or read-modify-write sequences, disable interrupts around the access in the main code (critical section) or use atomics.</li><li>No blocking calls, no <code>delay()</code>, no <code>printf</code>, no <code>malloc</code> inside an ISR.</li><li>Clear the interrupt source flag, or the ISR re-enters forever. Some flags clear on read of a data register; check the manual.</li><li>Cortex-M NVIC: lower number = higher priority. Only interrupts with priority numerically ≥ <code>configMAX_SYSCALL_INTERRUPT_PRIORITY</code> may call FreeRTOS <code>...FromISR</code> APIs.</li></ol>
+<p>Latency = hardware entry (Cortex-M: 12 cycles typical) + time spent in higher-priority ISRs + time interrupts are disabled.</p>
+<pre><code>static volatile uint32_t ticks;
+
+void SysTick_Handler(void) { ticks++; }
+
+uint32_t get_ticks(void) {
+    return ticks;           // 32-bit aligned read is atomic on 32-bit cores
+}
+
+// Wrap-safe timeout check (works across counter overflow):
+if ((uint32_t)(get_ticks() - start) &gt;= timeout_ms) { ... }</code></pre>
+<h3>Timers and PWM</h3>
+<ul><li>Tick frequency: <code>f_tick = f_timer_clk / prescaler</code>. Counter runs 0 … reload, so <strong>period = (reload + 1) / f_tick</strong>.</li><li>STM32: <code>PSC</code> register holds prescaler − 1, <code>ARR</code> holds reload. AVR CTC mode: <code>OCRnA</code> holds reload.</li><li>PWM: duty = compare / (reload + 1). Resolution in bits = log2(reload + 1). Higher PWM frequency means lower resolution for a fixed clock.</li><li>Input capture measures periods/pulse widths; output compare schedules edges.</li><li>Watchdog: must be refreshed periodically; refresh it from the main loop after checking that all tasks are alive, never from a timer ISR alone.</li></ul>
+<p>Calculator: <code>cecalc.py timer --clock 16MHz --target 1kHz --bits 16 --prescalers 1,8,64,256,1024</code>.</p>
+<h3>Serial buses</h3>
+<table><thead><tr><th></th><th>UART</th><th>SPI</th><th>I2C</th><th>CAN</th></tr></thead><tbody><tr><td>Wires</td><td>TX, RX (+GND)</td><td>SCLK, MOSI/COPI, MISO/CIPO, CS per device</td><td>SDA, SCL</td><td>CANH, CANL (differential)</td></tr><tr><td>Clock</td><td>none (agreed baud)</td><td>from controller</td><td>from controller</td><td>none (bit timing)</td></tr><tr><td>Duplex</td><td>full</td><td>full</td><td>half</td><td>half</td></tr><tr><td>Addressing</td><td>point-to-point</td><td>chip-select lines</td><td>7-bit (or 10-bit) address</td><td>message ID (priority)</td></tr><tr><td>Typical speed</td><td>9600–921600 baud</td><td>1–50+ MHz</td><td>100 k / 400 k / 1 M / 3.4 MHz</td><td>125 k–1 Mbps (CAN FD data phase faster)</td></tr><tr><td>Gotchas</td><td>baud error, TX↔RX crossed, voltage levels (RS-232 is ±V)</td><td>mode (CPOL/CPHA), CS timing, MSB/LSB first</td><td>pull-ups required, address shifted by 1 bit in some APIs, bus lock-up</td><td>120 Ω termination at <strong>both</strong> ends, transceiver needed</td></tr></tbody></table>
+<p>UART details:</p>
+<ul><li>Frame 8N1 = start + 8 data + stop = 10 bits. Throughput = baud / 10 bytes/s.</li><li>Receiver resynchronizes on each start bit; total baud mismatch between the two sides should stay under about 2%.</li><li>Idle line is high. A "break" holds the line low longer than a frame.</li></ul>
+<p>SPI modes: mode 0 (CPOL 0, CPHA 0) and mode 3 (CPOL 1, CPHA 1) are most common. Sample edge: mode 0 samples on the rising edge.</p>
+<p>I2C details:</p>
+<ul><li>Start: SDA falls while SCL is high. Stop: SDA rises while SCL is high. Data changes only while SCL is low.</li><li>After each byte, the receiver drives ACK (low) or NACK (high).</li><li>Address byte = 7-bit address &lt;&lt; 1 | R/W. Datasheets list either the 7-bit address (0x50) or the 8-bit write address (0xA0); libraries differ in which they expect.</li><li>Pull-up value: small enough for rise time (bus capacitance), large enough that devices can sink the current (3 mA at standard/fast mode). 4.7 kΩ at 100 kHz, 2.2 kΩ at 400 kHz are common starting points.</li><li>Clock stretching: a target holds SCL low to pause the controller.</li><li>Bus stuck low after a reset mid-transfer: toggle SCL up to 9 times, then send a stop.</li></ul>
+<p>Calculator: <code>cecalc.py baud --clock 16MHz --baud 115200</code>.</p>
+<h3>ADC and DAC</h3>
+<ul><li>LSB = Vref / 2^N. A 10-bit ADC at 5 V: 4.88 mV per step. At 3.3 V: 3.22 mV.</li><li>Code = floor(Vin / LSB), clamped to 2^N − 1.</li><li>Sample at more than twice the highest signal frequency (Nyquist); add an anti-aliasing low-pass filter before the ADC.</li><li>SAR ADCs sample onto a capacitor: the source impedance must let it settle within the sampling time. Buffer high-impedance sources or lengthen the sample time.</li><li>Effective resolution is lower than N bits because of noise: ENOB = (SINAD − 1.76) / 6.02.</li><li>Averaging 4^k samples adds about k bits of resolution when noise is present (oversampling).</li><li>A voltage divider for measuring a battery: pick resistors so Vin stays below Vref at max input; high values reduce drain but raise source impedance.</li></ul>
+<p>Calculator: <code>cecalc.py adc --bits 12 --vref 3.3V --volts 1.2</code>.</p>
+<h3>DMA</h3>
+<p>Moves data between peripherals and memory without the CPU. Configure source, destination, count, increment modes, and trigger. Common uses: UART RX into a circular buffer, ADC scan into an array, SPI display updates. Watch cache coherence on cores with data caches (Cortex-M7): clean/invalidate the buffer or place it in non-cacheable memory.</p>
+<h3>RTOS concepts</h3>
+<ul><li>Tasks with priorities; the scheduler runs the highest-priority ready task (preemptive). Equal priorities round-robin on tick.</li><li><strong>Mutex</strong> (ownership, priority inheritance, for protecting a resource) vs <strong>binary semaphore</strong> (signaling, e.g. ISR → task) vs <strong>counting semaphore</strong> (pool of N resources) vs <strong>queue</strong> (pass data).</li><li><strong>Priority inversion</strong>: low task holds a mutex, high task waits, medium task preempts low. Fix: priority inheritance (mutexes in FreeRTOS do this; semaphores do not).</li><li>Deadlock: acquire locks in a fixed global order.</li><li>Stack per task: size it from worst-case call depth plus ISR frames; enable stack overflow checking during development.</li><li>From an ISR use only <code>...FromISR</code> APIs and request a context switch if a higher-priority task woke.</li><li>Rate-monotonic scheduling: shorter period → higher priority. Schedulable for n tasks if <code>Σ Ci/Ti ≤ n(2^(1/n) − 1)</code> (sufficient, not necessary; about 0.69 as n → ∞).</li></ul>
+<h3>Low power</h3>
+<ul><li>Sleep modes trade wake-up time for current: run → sleep (core stopped) → stop (clocks off, RAM kept) → standby/deep sleep (most state lost).</li><li>Average current = Σ (current_i × time_i) / period. Battery life (hours) ≈ capacity (mAh) / average current (mA), derated for temperature, self-discharge, and cut-off voltage.</li><li>Turn off unused peripheral clocks, configure unused pins as analog or with a defined level, lower the clock, batch work.</li><li>Dynamic CMOS power ∝ C V² f.</li></ul>
+<h3>Debugging firmware</h3>
+<ul><li>SWD/JTAG with a debugger (ST-Link, J-Link, CMSIS-DAP): breakpoints, watchpoints, register view.</li><li>Logic analyzer for protocol timing and decoding; oscilloscope for analog levels, rise times, ringing, noise.</li><li>Toggle a GPIO at ISR entry/exit to measure timing on a scope.</li><li>Cortex-M HardFault: read the stacked PC and LR, plus CFSR/HFSR/MMFAR/BFAR registers, to find the faulting instruction. Common causes: null pointer, stack overflow, unaligned access, executing from invalid memory, division by zero with trapping enabled.</li></ul>
+<h3>Firmware bug checklist</h3>
+<ol><li>Peripheral clock enabled? Pin in the right mode and alternate function?</li><li>Interrupt enabled at the peripheral <strong>and</strong> in the NVIC, and globally?</li><li>Flag cleared in the ISR?</li><li>Shared variables <code>volatile</code>, accesses atomic?</li><li>Stack large enough? (Random crashes after adding a local array.)</li><li>Correct clock frequency assumed in baud/timer math? (HSI vs HSE vs PLL.)</li><li>Voltage levels compatible (3.3 V MCU talking to a 5 V device)?</li><li>Common ground between boards?</li><li>Watchdog resetting the chip silently?</li><li>Compiler optimization removing a delay loop or merging register accesses (missing <code>volatile</code>)?</li></ol></section>
+<section><h2 id="s7"><span class="num">07</span>Reference: Operating Systems</h2>
+<p>Processes, scheduling, synchronization, deadlock, memory, and file systems, with the methods for solving trace-style problems.</p>
+<h3>Contents</h3>
+<ul><li>Processes and threads</li><li>CPU scheduling</li><li>Synchronization</li><li>Deadlock</li><li>Memory management</li><li>File systems</li><li>I/O</li><li>Common mistakes</li></ul>
+<h3>Processes and threads</h3>
+<ul><li>Process: address space + resources + one or more threads. Thread: PC, registers, stack; shares the address space with sibling threads.</li><li>States: new → ready ⇄ running → waiting → ready; running → terminated.</li><li>Context switch saves/restores registers, switches page tables (process switch only), and pollutes caches and the TLB.</li><li>System call: user mode traps into kernel mode (<code>ecall</code> on RISC-V, <code>syscall</code> on x86-64, <code>svc</code> on ARM).</li><li><code>fork()</code> returns 0 in the child and the child's PID in the parent; memory is copy-on-write. n sequential <code>fork()</code> calls in straight-line code produce 2^n processes. <code>exec()</code> replaces the image; <code>wait()</code> reaps a child (unreaped children are zombies).</li></ul>
+<h3>CPU scheduling</h3>
+<p>Metrics (per process):</p>
+<ul><li>turnaround = completion − arrival</li><li>waiting = turnaround − burst (for CPU-only jobs)</li><li>response = first time on CPU − arrival</li></ul>
+<table><thead><tr><th>Algorithm</th><th>Behavior</th><th>Notes</th></tr></thead><tbody><tr><td>FCFS</td><td>run in arrival order</td><td>convoy effect</td></tr><tr><td>SJF (non-preemptive)</td><td>shortest next burst</td><td>optimal average waiting time; starvation</td></tr><tr><td>SRTF (preemptive SJF)</td><td>preempt when a shorter job arrives</td><td>optimal average waiting among preemptive</td></tr><tr><td>Round robin</td><td>time quantum q</td><td>large q → FCFS; small q → overhead; good response</td></tr><tr><td>Priority</td><td>highest priority first</td><td>starvation; fix with aging</td></tr><tr><td>MLFQ</td><td>multiple queues, demote CPU hogs</td><td>approximates SJF without knowing bursts</td></tr><tr><td>CFS (Linux)</td><td>pick task with least virtual runtime</td><td>red-black tree, weights from nice values</td></tr></tbody></table>
+<p>Method for any scheduling question: draw the Gantt chart with times, then fill a table (arrival, burst, completion, turnaround, waiting). State the tie-breaking rule (usually lower PID/earlier arrival first) and, for RR, whether a newly arrived process enters the queue before the preempted one (convention: new arrival first).</p>
+<h3>Synchronization</h3>
+<p>Critical-section requirements: mutual exclusion, progress, bounded waiting.</p>
+<ul><li><strong>Mutex/lock</strong>: one owner. Spinlocks for short waits on multiprocessors; sleeping locks otherwise.</li><li><strong>Semaphore</strong>: integer with <code>wait/P</code> (decrement, block if negative or zero) and <code>signal/V</code> (increment, wake one). Binary for mutual exclusion or signaling; counting for N resources.</li><li><strong>Condition variable</strong>: always used with a mutex; <code>wait</code> atomically releases the mutex and sleeps. <strong>Always wait in a while loop.</strong></li><li><strong>Monitor</strong>: mutex + condition variables bundled with the data.</li><li>Hardware support: test-and-set, compare-and-swap, LR/SC, fetch-and-add. Peterson's algorithm works only with sequential consistency (needs fences on modern CPUs).</li></ul>
+<p>Producer–consumer with a bounded buffer (pthreads):</p>
+<pre><code>pthread_mutex_lock(&amp;m);
+while (count == N)                  // while, not if
+    pthread_cond_wait(&amp;not_full, &amp;m);
+buf[in] = item; in = (in + 1) % N; count++;
+pthread_cond_signal(&amp;not_empty);
+pthread_mutex_unlock(&amp;m);</code></pre>
+<p>Semaphore version: <code>empty = N</code>, <code>full = 0</code>, <code>mutex = 1</code>. Producer: <code>P(empty); P(mutex); put; V(mutex); V(full)</code>. Swapping the order <code>P(mutex); P(empty)</code> deadlocks when the buffer is full.</p>
+<p>Classic problems: producer–consumer, readers–writers (reader or writer preference, starvation), dining philosophers (break circular wait: one philosopher picks up in reverse order, or limit to N − 1 at the table).</p>
+<h3>Deadlock</h3>
+<p>Coffman conditions (all four needed): mutual exclusion, hold and wait, no preemption, circular wait.</p>
+<ul><li>Prevention: break one condition (global lock ordering breaks circular wait; request all at once breaks hold-and-wait).</li><li>Avoidance: <strong>Banker's algorithm</strong>. <code>Need = Max − Allocation</code>. Safe if some order lets every process finish: repeatedly find a process with <code>Need ≤ Work</code>, then <code>Work += Allocation</code>. Grant a request only if the resulting state is safe.</li><li>Detection: wait-for graph cycle (single-instance resources) or the detection variant of Banker's; then recover by killing or preempting.</li></ul>
+<h3>Memory management</h3>
+<ul><li>Contiguous allocation: first-fit, best-fit, worst-fit; external fragmentation; compaction.</li><li>Paging removes external fragmentation; internal fragmentation averages half a page per segment.</li><li>Address translation arithmetic, multi-level tables, TLBs: see <code>computer-architecture.md</code> → Virtual memory (and <code>cecalc.py vm</code>).</li><li>Effective access time with page faults: <code>EAT = (1 − p) × mem_time + p × fault_time</code>. With a fault time of 8 ms and memory 100 ns, p = 1/1000 makes EAT ≈ 8.1 µs (80× slower).</li></ul>
+<h4>Page replacement</h4>
+<p>Trace the reference string with a table of frames per step; count faults (initial loads count).</p>
+<table><thead><tr><th>Algorithm</th><th>Rule</th><th>Notes</th></tr></thead><tbody><tr><td>FIFO</td><td>evict oldest loaded</td><td><strong>Belady's anomaly</strong>: more frames can cause more faults</td></tr><tr><td>OPT</td><td>evict the page used farthest in the future</td><td>optimal; needs future knowledge; benchmark only</td></tr><tr><td>LRU</td><td>evict least recently used</td><td>stack algorithm, no Belady's anomaly</td></tr><tr><td>Clock (second chance)</td><td>circular scan, clear reference bits, evict first with bit 0</td><td>practical LRU approximation</td></tr><tr><td>LFU / MFU</td><td>frequency-based</td><td>rarely good alone</td></tr></tbody></table>
+<p>Thrashing: total working sets exceed physical memory; CPU utilization collapses. Fix with working-set or page-fault-frequency control, or by running fewer processes.</p>
+<h3>File systems</h3>
+<ul><li>Inode holds metadata and block pointers; directory entries map names to inode numbers. Hard links share an inode; symlinks store a path.</li><li>Max file size with 12 direct pointers, 1 single, 1 double, 1 triple indirect, block size B, pointer size P: <code>(12 + B/P + (B/P)^2 + (B/P)^3) × B</code>. With B = 4 KiB, P = 4 B: 1024 pointers per block → about 4 TiB.</li><li>Allocation: contiguous, linked (FAT), indexed (inodes), extents.</li><li>Journaling writes metadata (or data) to a log first, so a crash leaves a consistent state after replay.</li></ul>
+<h3>I/O</h3>
+<ul><li>Polling (busy-wait), interrupt-driven, DMA (device transfers blocks, interrupts on completion).</li><li>Disk scheduling: FCFS, SSTF, SCAN (elevator), C-SCAN, LOOK/C-LOOK. Total head movement = Σ |track differences|. State the initial direction for SCAN/LOOK.</li><li>Buffering, caching, spooling; SSDs need no seek scheduling but have erase-block and wear-leveling constraints.</li></ul>
+<h3>Common mistakes</h3>
+<ul><li>Using <code>if</code> instead of <code>while</code> around condition variable waits.</li><li>Forgetting that <code>sem_wait</code> order matters (deadlock in bounded buffer).</li><li>Counting the initial page loads as hits in replacement traces.</li><li>Leaving the tie-breaking rule unstated in scheduling problems.</li><li>Assuming <code>fork()</code> in a loop creates n processes instead of 2^n.</li></ul></section>
+<section><h2 id="s8"><span class="num">08</span>Reference: Networking</h2>
+<p>Layers, addressing, delay math, TCP, and error-detecting codes.</p>
+<h3>Contents</h3>
+<ul><li>Layers</li><li>Addressing and subnetting</li><li>Delay and throughput</li><li>TCP and UDP</li><li>Link layer</li><li>Error detection and correction</li><li>Security basics</li><li>Common mistakes</li></ul>
+<h3>Layers</h3>
+<table><thead><tr><th>OSI</th><th>TCP/IP</th><th>Unit</th><th>Examples</th></tr></thead><tbody><tr><td>7 Application / 6 Presentation / 5 Session</td><td>Application</td><td>message</td><td>HTTP, DNS, TLS, SSH, MQTT</td></tr><tr><td>4 Transport</td><td>Transport</td><td>segment (TCP) / datagram (UDP)</td><td>TCP, UDP, QUIC (over UDP)</td></tr><tr><td>3 Network</td><td>Internet</td><td>packet</td><td>IPv4, IPv6, ICMP</td></tr><tr><td>2 Data link</td><td>Link</td><td>frame</td><td>Ethernet, Wi-Fi (802.11), ARP</td></tr><tr><td>1 Physical</td><td>Link</td><td>bits</td><td>cables, radio, encoding</td></tr></tbody></table>
+<p>Encapsulation: each layer adds its header (Ethernet 14 B + 4 B FCS, IPv4 20 B min, TCP 20 B min, UDP 8 B). Ethernet MTU 1500 B → max TCP payload (MSS) 1460 B without options.</p>
+<h3>Addressing and subnetting</h3>
+<ul><li>IPv4 = 32 bits. Prefix /n: n network bits, 32 − n host bits.</li><li>Addresses per subnet 2^(32−n). Usable hosts = 2^(32−n) − 2 (network and broadcast reserved) for n ≤ 30; /31 = 2 (point-to-point links, RFC 3021); /32 = 1.</li><li>Network address = IP AND mask. Broadcast = network OR NOT mask.</li><li>Private ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. Loopback 127.0.0.0/8. Link-local 169.254.0.0/16.</li><li>VLSM: allocate the largest subnets first, each aligned to its own size.</li><li>IPv6 = 128 bits; /64 per LAN; SLAAC; no broadcast (multicast instead).</li><li>MAC address = 48 bits. ARP maps IPv4 → MAC on the local link. Routers forward by longest-prefix match.</li><li>NAT maps private addresses and ports to a public address. DHCP assigns addresses (DORA: Discover, Offer, Request, Ack). DNS resolves names (UDP 53, TCP for large responses).</li></ul>
+<p>Calculator: <code>cecalc.py subnet 192.168.10.0/24 --split 26</code>, <code>cecalc.py subnet --hosts 50</code>.</p>
+<h3>Delay and throughput</h3>
+<p>For a packet of L bits on a link of rate R bits/s, length d, propagation speed s:</p>
+<ul><li>transmission delay = L / R</li><li>propagation delay = d / s (s ≈ 2 × 10^8 m/s in fiber or copper)</li><li>total per hop = processing + queuing + transmission + propagation</li><li>store-and-forward over N links (N − 1 routers), one packet: N × L/R + total propagation</li><li>bandwidth–delay product = R × RTT (bits in flight needed to fill the pipe)</li><li>Stop-and-wait utilization = (L/R) / (L/R + RTT). Sliding window W packets: min(1, W × (L/R) / (L/R + RTT)).</li><li>Throughput of a path = the bottleneck link rate.</li><li>Units: 1 Mbps = 10^6 bits/s. 1 MB (file) is usually 10^6 or 2^20 bytes; state which. Multiply bytes by 8.</li></ul>
+<p>Worked example: 1500-byte packet, 100 Mbps link, 2000 km. Transmission = 12 000 / 10^8 = 120 µs. Propagation = 2×10^6 / 2×10^8 = 10 ms. Propagation dominates.</p>
+<h3>TCP and UDP</h3>
+<ul><li>UDP: connectionless, no reliability, no ordering, 8-byte header. Good for DNS, streaming, games, QUIC.</li><li>TCP: connection-oriented, reliable, ordered byte stream.</li><li class="nested">3-way handshake: SYN → SYN-ACK → ACK. Teardown: FIN/ACK each direction; TIME_WAIT = 2 × MSL.</li><li class="nested">Sequence numbers count bytes; ACK = next expected byte.</li><li class="nested"><strong>Flow control</strong>: receiver-advertised window (don't overrun the receiver).</li><li class="nested"><strong>Congestion control</strong>: congestion window; slow start (cwnd doubles per RTT until ssthresh), congestion avoidance (+1 MSS per RTT), fast retransmit on 3 duplicate ACKs, fast recovery (Reno: cwnd halves). Timeout → cwnd back to 1 MSS (Tahoe/Reno). CUBIC and BBR are modern defaults.</li><li class="nested">Effective window = min(cwnd, rwnd). Throughput ≈ window / RTT.</li><li>Ports: 0–1023 well-known (HTTP 80, HTTPS 443, SSH 22, DNS 53). A connection is identified by the 5-tuple.</li></ul>
+<h3>Link layer</h3>
+<ul><li>Ethernet: CSMA/CD in old half-duplex hubs; switched full-duplex today. Switches learn MAC → port tables. VLANs (802.1Q) split broadcast domains.</li><li>Minimum Ethernet frame 64 bytes (so collisions were detectable in half-duplex).</li><li>Wi-Fi uses CSMA/CA (collision avoidance, ACKs, RTS/CTS for hidden terminals).</li><li>ALOHA efficiency: pure 1/(2e) ≈ 18.4%, slotted 1/e ≈ 36.8%.</li></ul>
+<h3>Error detection and correction</h3>
+<ul><li>Parity: detects any odd number of bit errors.</li><li>Internet checksum: 16-bit ones' complement sum of 16-bit words, then complemented. Weak but cheap.</li><li><strong>CRC</strong>: append r zeros (r = degree of generator), divide mod 2 (XOR), append the remainder. Detects all burst errors of length ≤ r. Receiver divides the whole frame; remainder 0 means no detected error.</li><li><strong>Hamming code</strong>: r parity bits for m data bits need <code>2^r ≥ m + r + 1</code>. Parity bits sit at positions 1, 2, 4, 8, …; parity bit p covers positions whose index has bit p set. Syndrome = XOR of positions of all 1 bits (with even parity) = position of a single-bit error. SEC-DED adds one overall parity bit to detect (not correct) double errors.</li><li>Hamming distance d: detects d − 1 errors, corrects ⌊(d − 1)/2⌋.</li></ul>
+<p>Calculator: <code>cecalc.py crc --data 11010011101100 --poly 1011</code>, <code>cecalc.py hamming 1011</code>, <code>cecalc.py hamming 0110111 --check</code>.</p>
+<h3>Security basics</h3>
+<ul><li>Symmetric encryption (AES) for bulk data; asymmetric (RSA, ECC) for key exchange and signatures; hashes (SHA-256) for integrity; MACs (HMAC) for integrity + authenticity.</li><li>TLS: handshake agrees on keys (ECDHE), authenticates the server by certificate, then encrypts with AES-GCM or ChaCha20-Poly1305.</li><li>Firewalls filter by address, port, and connection state.</li></ul>
+<h3>Common mistakes</h3>
+<ul><li>Forgetting the two reserved addresses when counting hosts.</li><li>Mixing bits and bytes in delay calculations.</li><li>Confusing flow control (receiver) with congestion control (network).</li><li>Treating latency and bandwidth as the same thing.</li><li>Using the wrong generator degree when appending zeros for CRC.</li></ul></section>
+<section><h2 id="s9"><span class="num">09</span>Reference: Circuits and Electronics</h2>
+<p>The analog and board-level electronics a computer engineer needs to interface chips safely.</p>
+<h3>Contents</h3>
+<ul><li>Fundamentals</li><li>RC circuits</li><li>Diodes and LEDs</li><li>Transistors as switches</li><li>CMOS logic</li><li>Logic levels and interfacing</li><li>Power and board-level practice</li><li>Measurement tips</li><li>Common mistakes</li></ul>
+<h3>Fundamentals</h3>
+<ul><li>Ohm: <code>V = I R</code>. Power: <code>P = V I = I² R = V² / R</code>. Check resistor power rating (1/4 W is common for through-hole, 1/10 W or less for small SMD).</li><li>KCL: currents into a node sum to zero. KVL: voltages around a loop sum to zero.</li><li>Series: <code>R = R1 + R2</code>. Parallel: <code>R = R1 R2 / (R1 + R2)</code>. Capacitors combine the opposite way.</li><li>Voltage divider: <code>Vout = Vin × R2 / (R1 + R2)</code> (unloaded). A load in parallel with R2 lowers Vout; keep load impedance ≫ R2.</li><li>Thevenin: any linear two-terminal network = voltage source + series resistance.</li><li>Units: mA × kΩ = V. µF × kΩ = ms.</li></ul>
+<h3>RC circuits</h3>
+<ul><li>Time constant <code>τ = R C</code>. Charging: <code>v(t) = V_final (1 − e^(−t/τ))</code>; 63.2% at τ, 86.5% at 2τ, 95% at 3τ, 99.3% at 5τ.</li><li>10–90% rise time ≈ 2.2 τ.</li><li>First-order low-pass cutoff: <code>f_c = 1 / (2π R C)</code>; −20 dB/decade above it.</li><li>RC delay on long wires and loaded outputs limits edge rates; capacitive load slows logic.</li></ul>
+<p>Calculator: <code>cecalc.py rc --r 10k --c 100nF --t 1ms</code>.</p>
+<h3>Diodes and LEDs</h3>
+<ul><li>Silicon diode forward drop ≈ 0.6–0.7 V; Schottky ≈ 0.2–0.4 V. LEDs 1.8–3.3 V depending on color.</li><li>LED resistor: <code>R = (V_supply − V_f) / I_LED</code>. 3.3 V supply, red LED (V_f 2.0 V), 10 mA → 130 Ω (use 150 Ω).</li><li>Flyback diode across relay coils and motors (reverse-biased in normal operation) clamps the inductive kick when the switch opens.</li><li>Zener: regulates reverse voltage; TVS diodes clamp ESD and surges.</li></ul>
+<h3>Transistors as switches</h3>
+<p><strong>N-channel MOSFET, low side</strong> (load between supply and drain, source to ground):</p>
+<ul><li>Turns on when V_GS exceeds the threshold by enough. <code>V_GS(th)</code> is where it <em>starts</em> to conduct (e.g. 250 µA), not fully on. Check R_DS(on) at your actual gate voltage.</li><li>With a 3.3 V MCU pin, pick a <strong>logic-level</strong> MOSFET with R_DS(on) specified at V_GS = 2.5 V or 3.3 V (e.g. AO3400-class parts, not IRF540N).</li><li>Add a gate pull-down (10–100 kΩ) so the load stays off while the MCU pin floats during reset, and optionally a small gate resistor (tens of Ω) to limit ringing.</li><li>Power dissipated ≈ I² × R_DS(on) when fully on.</li></ul>
+<p><strong>P-channel MOSFET, high side</strong>: turns on when the gate is pulled below the source. Driving from an MCU when the load supply is above the MCU voltage needs an NPN or N-MOSFET level shifter on the gate.</p>
+<p><strong>NPN BJT as switch</strong>: saturate it. <code>I_B ≥ I_C / β_min × (2 to 5)</code> for margin. <code>R_B = (V_pin − 0.7) / I_B</code>. Example: 100 mA load, β_min 100, factor 5 → I_B = 5 mA → R_B = (3.3 − 0.7)/5 mA ≈ 520 Ω → 470 Ω.</p>
+<h3>CMOS logic</h3>
+<ul><li>Inverter: PMOS to V_DD, NMOS to ground. NAND: parallel PMOS, series NMOS. NOR: series PMOS, parallel NMOS. NAND is preferred over NOR because series PMOS (slower holes) hurts NOR more.</li><li>Complex gates are naturally inverting (AOI, OAI). A static CMOS gate for function F has pull-down network implementing F' in NMOS.</li><li><strong>Dynamic power</strong> <code>P = α C V² f</code> (α = activity factor). <strong>Static power</strong> from leakage grows as thresholds drop.</li><li>Propagation delay rises with load capacitance and falls with supply voltage.</li><li>Fan-out: how many inputs one output can drive while meeting levels and timing.</li><li>Never leave CMOS inputs floating: they draw shoot-through current and oscillate.</li></ul>
+<h3>Logic levels and interfacing</h3>
+<table><thead><tr><th>Family</th><th>V_OH min</th><th>V_OL max</th><th>V_IH min</th><th>V_IL max</th></tr></thead><tbody><tr><td>5 V TTL</td><td>2.4</td><td>0.4</td><td>2.0</td><td>0.8</td></tr><tr><td>5 V CMOS</td><td>4.4</td><td>0.5</td><td>3.5</td><td>1.5</td></tr><tr><td>3.3 V LVCMOS</td><td>2.4</td><td>0.4</td><td>2.0</td><td>0.8</td></tr></tbody></table>
+<p>(Typical values; check the datasheet.)</p>
+<ul><li>Noise margin high = V_OH − V_IH, low = V_IL − V_OL.</li><li>3.3 V output → 5 V TTL input usually works (2.4 &gt; 2.0). 3.3 V → 5 V CMOS input may not (needs 3.5 V). 5 V → 3.3 V input damages a non-5V-tolerant pin; use a divider, a level shifter, or a 5V-tolerant (FT) pin.</li><li>Bidirectional open-drain lines (I2C) shift with a MOSFET-based shifter (BSS138 circuit) or a dedicated IC.</li></ul>
+<h3>Power and board-level practice</h3>
+<ul><li>One 100 nF ceramic decoupling capacitor per power pin, as close to the pin as possible, plus bulk capacitance (1–10 µF) per rail.</li><li>Linear regulator dissipation = (V_in − V_out) × I_load. 12 V → 3.3 V at 200 mA wastes 1.74 W: use a buck converter.</li><li>LDO dropout: V_in must exceed V_out by the dropout voltage.</li><li>Keep ground returns short; a solid ground plane beats thin ground traces. Separate noisy (motor) and quiet (analog) return paths meeting at one point.</li><li>Crystal load capacitors: <code>C_load = (C1 × C2)/(C1 + C2) + C_stray</code>; with C1 = C2, <code>C1 = 2 (C_load − C_stray)</code>.</li><li>Signal integrity: when trace length exceeds about 1/6 of the rise-time distance, treat it as a transmission line and terminate it.</li></ul>
+<h3>Measurement tips</h3>
+<ul><li>Multimeter current mode goes in series; voltage in parallel. Never measure voltage in current mode.</li><li>Scope ground clip connects to earth ground on mains-powered scopes: do not clip it to a non-ground node of a mains-referenced circuit.</li><li>Use ×10 probes for fast edges; short ground springs to see real ringing.</li></ul>
+<h3>Common mistakes</h3>
+<ul><li>Using V_GS(th) as if it were the full-on gate voltage.</li><li>Forgetting the flyback diode on an inductive load.</li><li>Driving an LED or motor directly from a GPIO pin beyond its current rating.</li><li>Ignoring the load when computing a voltage divider.</li><li>Omitting decoupling capacitors and then chasing "random" resets.</li></ul></section>
+<section><h2 id="s10"><span class="num">10</span>Templates</h2>
+<p>Files in <code>assets/templates/</code>.</p>
+<h3>debug-log.md</h3>
+<pre><code># Debug Log
+
+**System:** (board, MCU/FPGA, firmware version)
+**Date started:** YYYY-MM-DD
+
+## Symptom
+
+What happens, exactly. When. How often. What changed recently.
+
+## Expected behavior
+
+## Known good
+
+What still works, and the last version where this worked.
+
+## Hypotheses
+
+Ranked most to least likely.
+
+| # | Hypothesis | How to test | Result |
+|---|---|---|---|
+| 1 | | | |
+| 2 | | | |
+| 3 | | | |
+
+## Measurements
+
+| Time | Probe point / tool | Setting | Observed | Expected |
+|---|---|---|---|---|
+| | | | | |
+
+## Root cause
+
+## Fix
+
+## How we confirmed it
+
+## Prevent it next time
+
+(test, assertion, checklist item, comment in code)</code></pre>
+<h3>design-review-checklist.md</h3>
+<pre><code># Design Review Checklist
+
+**Project:**
+**Reviewer:**
+**Date:** YYYY-MM-DD
+**Target:** (FPGA part / MCU part number / simulator)
+**Clock(s):**
+
+## Interface
+
+- [ ] Every port has a documented width, direction, and meaning
+- [ ] Reset type stated (sync/async, active-high/low) and used consistently
+- [ ] Clock domains listed; every crossing identified
+
+## HDL
+
+- [ ] Sequential logic uses `always_ff` with `&lt;=`; combinational uses `always_comb` with `=`
+- [ ] Every `always_comb` output has a default assignment (no latches in the synthesis report)
+- [ ] Every `case` has a `default`
+- [ ] No width mismatch warnings; constants sized
+- [ ] Signed arithmetic is intentional (`signed` / `$signed`)
+- [ ] No signal driven from two blocks; no combinational loops
+- [ ] CDC: single bits through 2-FF synchronizers; buses through Gray code, handshake, or async FIFO
+- [ ] Reset deasserts synchronously
+- [ ] Timing constraints written; worst negative slack ≥ 0
+
+## Firmware
+
+- [ ] Peripheral clocks enabled before register access
+- [ ] ISRs short, flags cleared, no blocking calls
+- [ ] ISR-shared data `volatile` and accessed atomically
+- [ ] Stack size checked (per task under an RTOS)
+- [ ] Watchdog refreshed only when all tasks are healthy
+- [ ] Pins in a safe state from reset until configured
+- [ ] Error paths handled (timeouts on every wait loop)
+
+## Verification
+
+- [ ] Self-checking testbench, not waveform eyeballing
+- [ ] Corner cases: reset mid-operation, back-to-back inputs, max/min values, overflow
+- [ ] Tested on hardware at the target clock
+
+## Findings
+
+| # | Severity | Location | Issue | Fix |
+|---|---|---|---|---|
+| 1 | | | | |</code></pre>
+<h3>formula-sheet.md</h3>
+<pre><code># Computer Engineering Formula Sheet
+
+Keep only the sections your exam covers.
+
+## Numbers
+
+- n-bit unsigned: 0 … 2^n − 1. Two&#x27;s complement: −2^(n−1) … 2^(n−1) − 1
+- Negate: invert bits, add 1. Signed overflow: same-sign operands, different-sign result
+- IEEE 754 single: 1 | 8 (bias 127) | 23. Double: 1 | 11 (bias 1023) | 52
+- Value = (−1)^s × 1.f × 2^(e − bias)
+
+## Logic and timing
+
+- De Morgan: (AB)&#x27; = A&#x27; + B&#x27;, (A + B)&#x27; = A&#x27;B&#x27;
+- Setup: T_clk ≥ t_cq + t_pd + t_setup. Hold: t_cq + t_cd ≥ t_hold
+- f_max = 1 / (t_cq + t_pd,max + t_setup)
+- Dynamic power: P = α C V² f
+
+## Performance
+
+- CPU time = IC × CPI / f
+- CPI = Σ (fraction_i × CPI_i)
+- Amdahl: S = 1 / ((1 − p) + p/s)
+- Pipeline CPI = 1 + stalls per instruction
+
+## Caches
+
+- offset = log2(block), sets = size / (block × ways), index = log2(sets), tag = A − index − offset
+- AMAT = hit + miss rate × penalty (nest for multiple levels, local miss rates)
+
+## Virtual memory
+
+- offset = log2(page), VPN = VA − offset, flat table = 2^VPN × PTE size
+- TLB reach = entries × page size
+- EAT with faults = (1 − p) × t_mem + p × t_fault
+
+## Operating systems
+
+- Turnaround = completion − arrival. Waiting = turnaround − burst
+- Deadlock needs: mutual exclusion, hold and wait, no preemption, circular wait
+- RMS bound: Σ Ci/Ti ≤ n(2^(1/n) − 1)
+
+## Networking
+
+- Transmission = L/R. Propagation = d/s. BDP = R × RTT
+- Hosts per subnet = 2^(32 − prefix) − 2
+- Hamming parity bits: 2^r ≥ m + r + 1
+
+## Embedded and circuits
+
+- Timer period = prescaler × (reload + 1) / f_clk
+- UART 8N1: bytes/s = baud / 10
+- ADC LSB = Vref / 2^N
+- τ = RC, f_c = 1/(2πRC), LED R = (Vs − Vf) / I</code></pre>
+<h3>hdl-templates.md</h3>
+<pre><code># HDL Templates
+
+Starting points for a synthesizable SystemVerilog module and a self-checking testbench. Rename `module_name`, set the parameters, and replace the placeholder logic.
+
+## Contents
+
+- Module template
+- Testbench template
+
+## Module template
+</code></pre>
+<p>// ----------------------------------------------------------------------------- // Module:  module_name // Purpose: one sentence // Clock:   clk, rising edge // Reset:   rst_n, asynchronous assert, synchronous deassert (external synchronizer) // Latency: N cycles from in_valid to out_valid // ----------------------------------------------------------------------------- module module_name #(   parameter int W = 8 ) (   input  logic         clk,   input  logic         rst_n,   input  logic         in_valid,   input  logic [W-1:0] in_data,   output logic         out_valid,   output logic [W-1:0] out_data );</p>
+<p>  // ---------------------------------------------------------------- state   logic [W-1:0] data_q, data_d;   logic         valid_q;</p>
+<p>  // ---------------------------------------------------------------- next-state logic   always_comb begin     data_d = data_q;              // defaults first: no latches     if (in_valid) data_d = in_data;   end</p>
+<p>  // ---------------------------------------------------------------- registers   always_ff @(posedge clk or negedge rst_n) begin     if (!rst_n) begin       data_q  &lt;= '0;       valid_q &lt;= 1'b0;     end else begin       data_q  &lt;= data_d;       valid_q &lt;= in_valid;     end   end</p>
+<p>  // ---------------------------------------------------------------- outputs   assign out_data  = data_q;   assign out_valid = valid_q;</p>
+<p>endmodule</p>
+<pre><code>
+## Testbench template
+</code></pre>
+<p>// Self-checking testbench for module_name. Prints PASS/FAIL and a summary. `timescale 1ns/1ps module module_name_tb;   localparam int W = 8;   localparam time CLK_PERIOD = 10ns;</p>
+<p>  logic         clk = 0, rst_n = 0;   logic         in_valid = 0;   logic [W-1:0] in_data  = '0;   logic         out_valid;   logic [W-1:0] out_data;   int           errors = 0;</p>
+<p>  module_name #(.W(W)) dut (.*);</p>
+<p>  always #(CLK_PERIOD/2) clk = ~clk;</p>
+<p>  // Drive one input, then check the output one cycle later.   task automatic apply_and_check(input logic [W-1:0] value);     @(negedge clk);     in_valid = 1; in_data = value;     @(negedge clk);     in_valid = 0;     if (!out_valid || out_data !== value) begin       $error("value %0h: got valid=%0b data=%0h", value, out_valid, out_data);       errors++;     end   endtask</p>
+<p>  initial begin     repeat (3) @(negedge clk);     rst_n = 1;</p>
+<p>    apply_and_check('0);                       // minimum     apply_and_check('1);                       // maximum     apply_and_check(W'(8'hA5));                // pattern     repeat (20) apply_and_check(W'($urandom)); // random</p>
+<p>    if (errors == 0) $display("PASS");     else             $display("FAIL: %0d errors", errors);     $finish;   end endmodule</p>
+<pre><code></code></pre>
+<h3>lab-report.md</h3>
+<pre><code># Lab Report: TITLE
+
+**Course:**
+**Lab number:**
+**Name(s):**
+**Date:** YYYY-MM-DD
+
+## Objective
+
+One or two sentences: what you built or measured, and why.
+
+## Background
+
+The concepts and equations the lab relies on. Define every symbol.
+
+## Design
+
+- Block diagram or schematic
+- Interface: inputs, outputs, widths, clock and reset
+- Key design decisions and the reason for each
+
+## Procedure
+
+Numbered steps someone else could repeat.
+
+## Results
+
+| Test | Input | Expected | Measured | Pass? |
+|---|---|---|---|---|
+| | | | | |
+
+Include waveforms, simulation screenshots, or scope captures with labeled axes.
+
+## Analysis
+
+- Compare measured against expected; explain every difference
+- Error sources and their size
+- Timing: critical path, max frequency, resource use (LUTs, FFs, memory)
+
+## Conclusion
+
+What worked, what didn&#x27;t, what you&#x27;d change.
+
+## Appendix
+
+Source code, constraints files, raw data.</code></pre></section>
+<section><h2 id="s11"><span class="num">11</span>Appendix: cecalc.py Source</h2>
+<p>The complete calculator. Save it as <code>compenclaude/scripts/cecalc.py</code>.</p>
+<pre class="src"><code>#!/usr/bin/env python3
+&quot;&quot;&quot;cecalc: exact calculators for computer engineering problems.
+
+Standard library only (Python 3.9+). Every command prints its working, so the
+numbers can be checked by hand.
+
+    python3 cecalc.py &lt;command&gt; -h      # options for one command
+
+Commands
+    conv     integer bases, two&#x27;s complement, Gray code, byte order
+    float    IEEE 754 encode/decode (single or double)
+    cache    address breakdown + optional trace simulation (LRU/FIFO, 3C misses)
+    amat     average memory access time, multi-level
+    cpu      iron law: CPU time from IC, CPI (or instruction mix), clock
+    amdahl   overall speedup, or speedup needed to hit a target
+    vm       virtual memory: page offset/VPN bits, page-table size, levels, TLB reach
+    subnet   IPv4/IPv6 subnet facts, splitting, prefix for N hosts
+    timer    MCU timer prescaler/reload search for a target frequency
+    baud     UART divisor and baud error
+    adc      ADC LSB size and code &lt;-&gt; voltage
+    rc       RC time constant, cutoff frequency, charge fraction
+    hamming  Hamming(SEC) encode or check/correct
+    crc      CRC remainder by mod-2 long division
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import ipaddress
+import math
+import re
+import struct
+import sys
+from collections import OrderedDict
+from decimal import Decimal, InvalidOperation, getcontext
+
+getcontext().prec = 80
+
+# --------------------------------------------------------------------------- parsing
+
+_SI = {&quot;&quot;: 1.0, &quot;p&quot;: 1e-12, &quot;n&quot;: 1e-9, &quot;u&quot;: 1e-6, &quot;µ&quot;: 1e-6, &quot;m&quot;: 1e-3,
+       &quot;k&quot;: 1e3, &quot;K&quot;: 1e3, &quot;M&quot;: 1e6, &quot;G&quot;: 1e9, &quot;T&quot;: 1e12}
+_SI_RE = re.compile(
+    r&quot;^\s*([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*([pnuµmkKMGT]?)\s*&quot;
+    r&quot;(?i:hz|ohms?|Ω|f|s|v|a|bps|baud)?\s*$&quot;)
+_SIZE_RE = re.compile(r&quot;^\s*(\d+)\s*([kKmMgGtT]?)(?:i?[bB])?\s*$&quot;)
+
+
+def die(msg: str) -&gt; None:
+    sys.exit(f&quot;error: {msg}&quot;)
+
+
+def parse_si(text: str) -&gt; float:
+    &quot;&quot;&quot;&#x27;16MHz&#x27; -&gt; 16e6, &#x27;100n&#x27; -&gt; 1e-7, &#x27;4.7uF&#x27; -&gt; 4.7e-6, &#x27;2e6&#x27; -&gt; 2e6.&quot;&quot;&quot;
+    m = _SI_RE.match(text)
+    if not m:
+        die(f&quot;cannot parse quantity {text!r} (try forms like 16MHz, 10k, 100n, 2e6)&quot;)
+    return float(m.group(1)) * _SI[m.group(2)]
+
+
+def parse_size(text: str) -&gt; int:
+    &quot;&quot;&quot;Byte sizes are binary: &#x27;32KiB&#x27;, &#x27;32KB&#x27; and &#x27;32K&#x27; all mean 32768.&quot;&quot;&quot;
+    m = _SIZE_RE.match(text)
+    if not m:
+        return parse_int(text)
+    return int(m.group(1)) * 1024 ** &quot;_KMGT&quot;.index(m.group(2).upper() or &quot;_&quot;)
+
+
+def parse_int(text: str) -&gt; int:
+    t = text.strip().replace(&quot;_&quot;, &quot;&quot;)
+    try:
+        return int(t, 0)
+    except ValueError:
+        try:
+            return int(t, 10)
+        except ValueError:
+            die(f&quot;cannot parse integer {text!r} (use 42, -7, 0x2A, 0b101010, 0o52)&quot;)
+    raise AssertionError
+
+
+def ilog2(n: int, what: str) -&gt; int:
+    if n &lt;= 0 or n &amp; (n - 1):
+        die(f&quot;{what} must be a power of two (got {n})&quot;)
+    return n.bit_length() - 1
+
+
+# --------------------------------------------------------------------------- formatting
+
+def eng(x: float, unit: str = &quot;&quot;) -&gt; str:
+    if x == 0 or math.isinf(x) or math.isnan(x):
+        return f&quot;{x:g} {unit}&quot;.strip()
+    for exp, p in ((12, &quot;T&quot;), (9, &quot;G&quot;), (6, &quot;M&quot;), (3, &quot;k&quot;), (0, &quot;&quot;),
+                   (-3, &quot;m&quot;), (-6, &quot;µ&quot;), (-9, &quot;n&quot;), (-12, &quot;p&quot;)):
+        if abs(x) &gt;= 10 ** exp:
+            return f&quot;{x / 10 ** exp:.6g} {p}{unit}&quot;.strip()
+    return f&quot;{x:.6g} {unit}&quot;.strip()
+
+
+def human_bytes(n: int) -&gt; str:
+    for p, unit in ((4, &quot;TiB&quot;), (3, &quot;GiB&quot;), (2, &quot;MiB&quot;), (1, &quot;KiB&quot;)):
+        if n &gt;= 1024 ** p and n % 1024 ** p == 0:
+            return f&quot;{n // 1024 ** p} {unit} ({n} B)&quot;
+    return f&quot;{n} B&quot;
+
+
+def grouped_bin(v: int, bits: int) -&gt; str:
+    s = format(v, f&quot;0{bits}b&quot;)
+    head = len(s) % 4
+    parts = ([s[:head]] if head else []) + [s[i:i + 4] for i in range(head, len(s), 4)]
+    return &quot;_&quot;.join(parts)
+
+
+def row(label: str, value) -&gt; None:
+    print(f&quot;  {label:&lt;24}{value}&quot;)
+
+
+# --------------------------------------------------------------------------- conv
+
+def cmd_conv(a) -&gt; None:
+    v = parse_int(a.value)
+    bits = a.bits
+    if bits is None:
+        for bits in (8, 16, 32, 64, 128, 256):
+            if (v &gt;= 0 and v &lt; 1 &lt;&lt; bits) or (v &lt; 0 and v &gt;= -(1 &lt;&lt; (bits - 1))):
+                break
+    if bits &lt;= 0:
+        die(&quot;--bits must be positive&quot;)
+    if v &lt; 0:
+        if v &lt; -(1 &lt;&lt; (bits - 1)):
+            die(f&quot;{v} does not fit in {bits}-bit two&#x27;s complement &quot;
+                f&quot;(range {-(1 &lt;&lt; (bits - 1))} .. {(1 &lt;&lt; (bits - 1)) - 1})&quot;)
+    elif v &gt;= 1 &lt;&lt; bits:
+        die(f&quot;{v} does not fit in {bits} bits (max unsigned {(1 &lt;&lt; bits) - 1})&quot;)
+    pattern = v &amp; ((1 &lt;&lt; bits) - 1)
+    signed = pattern - (1 &lt;&lt; bits) if pattern &gt;&gt; (bits - 1) else pattern
+    hexw = (bits + 3) // 4
+
+    print(f&quot;{a.value} as a {bits}-bit pattern&quot;)
+    row(&quot;hex&quot;, f&quot;0x{pattern:0{hexw}X}&quot;)
+    row(&quot;binary&quot;, grouped_bin(pattern, bits))
+    row(&quot;octal&quot;, f&quot;0o{pattern:o}&quot;)
+    row(&quot;unsigned&quot;, pattern)
+    row(&quot;signed (two&#x27;s compl.)&quot;, signed)
+    row(&quot;unsigned range&quot;, f&quot;0 .. {(1 &lt;&lt; bits) - 1}&quot;)
+    row(&quot;signed range&quot;, f&quot;{-(1 &lt;&lt; (bits - 1))} .. {(1 &lt;&lt; (bits - 1)) - 1}&quot;)
+    row(&quot;Gray code (b ^ b&gt;&gt;1)&quot;, grouped_bin(pattern ^ (pattern &gt;&gt; 1), bits))
+    row(&quot;popcount&quot;, bin(pattern).count(&quot;1&quot;))
+    if bits % 8 == 0:
+        be = pattern.to_bytes(bits // 8, &quot;big&quot;)
+        row(&quot;memory, big-endian&quot;, &quot; &quot;.join(f&quot;{b:02X}&quot; for b in be))
+        row(&quot;memory, little-endian&quot;, &quot; &quot;.join(f&quot;{b:02X}&quot; for b in reversed(be)))
+    if v &gt;= 0 and signed &lt; 0:
+        print(f&quot;  note: MSB is set, so the same bits read as {signed} when signed.&quot;)
+
+
+# --------------------------------------------------------------------------- float
+
+_FMT = {32: (&quot;&gt;f&quot;, &quot;&gt;I&quot;, 8, 23, 127), 64: (&quot;&gt;d&quot;, &quot;&gt;Q&quot;, 11, 52, 1023)}
+
+
+def cmd_float(a) -&gt; None:
+    note = None
+    if a.hex:
+        raw = parse_int(a.value)
+        digits = len(a.value.lower().replace(&quot;0x&quot;, &quot;&quot;).replace(&quot;_&quot;, &quot;&quot;))
+        width = 64 if a.double or digits &gt; 8 else 32
+        if raw &gt;&gt; width:
+            die(f&quot;pattern does not fit in {width} bits&quot;)
+        ffmt, ifmt, eb, mb, bias = _FMT[width]
+        stored = struct.unpack(ffmt, struct.pack(ifmt, raw))[0]
+    else:
+        width = 64 if a.double else 32
+        ffmt, ifmt, eb, mb, bias = _FMT[width]
+        try:
+            x = float(a.value)
+        except ValueError:
+            die(f&quot;cannot parse float {a.value!r}&quot;)
+        try:
+            raw = struct.unpack(ifmt, struct.pack(ffmt, x))[0]
+        except OverflowError:
+            raw = ((1 if x &lt; 0 else 0) &lt;&lt; (eb + mb)) | (((1 &lt;&lt; eb) - 1) &lt;&lt; mb)
+            note = &quot;magnitude exceeds the largest finite value: rounds to infinity&quot;
+        stored = struct.unpack(ffmt, struct.pack(ifmt, raw))[0]
+
+    sign = raw &gt;&gt; (eb + mb)
+    exp = (raw &gt;&gt; mb) &amp; ((1 &lt;&lt; eb) - 1)
+    frac = raw &amp; ((1 &lt;&lt; mb) - 1)
+    name = &quot;single (binary32)&quot; if width == 32 else &quot;double (binary64)&quot;
+    print(f&quot;IEEE 754 {name}: 1 sign, {eb} exponent (bias {bias}), {mb} fraction bits&quot;)
+    row(&quot;hex&quot;, f&quot;0x{raw:0{width // 4}X}&quot;)
+    row(&quot;fields s|exp|frac&quot;, f&quot;{sign} | {exp:0{eb}b} | {frac:0{mb}b}&quot;)
+
+    if exp == (1 &lt;&lt; eb) - 1:
+        row(&quot;class&quot;, &quot;NaN&quot; if frac else (&quot;-inf&quot; if sign else &quot;+inf&quot;))
+    elif exp == 0 and frac == 0:
+        row(&quot;class&quot;, &quot;-0&quot; if sign else &quot;+0&quot;)
+    else:
+        if exp == 0:
+            e, lead, cls = 1 - bias, &quot;0&quot;, &quot;subnormal&quot;
+        else:
+            e, lead, cls = exp - bias, &quot;1&quot;, &quot;normal&quot;
+        row(&quot;class&quot;, cls)
+        row(&quot;exponent&quot;, f&quot;stored {exp}, unbiased {e}&quot;)
+        mant = f&quot;{frac:0{mb}b}&quot;.rstrip(&quot;0&quot;) or &quot;0&quot;
+        row(&quot;value&quot;, f&quot;{&#x27;-&#x27; if sign else &#x27;+&#x27;}{lead}.{mant} (binary) x 2^{e}&quot;)
+        exact = f&quot;{Decimal(stored):f}&quot;
+        if &quot;.&quot; in exact:
+            exact = exact.rstrip(&quot;0&quot;).rstrip(&quot;.&quot;)
+        row(&quot;exact stored value&quot;, exact if abs(e) &lt; 60 else f&quot;{Decimal(stored):E}&quot;)
+        row(&quot;shortest repr&quot;, repr(stored))
+        row(&quot;ULP at this value&quot;, f&quot;2^{e - mb} = {2.0 ** (e - mb):.6g}&quot;)
+        if not a.hex:
+            try:
+                err = Decimal(a.value) - Decimal(stored)
+                row(&quot;rounding error&quot;, &quot;0 (exact)&quot; if err == 0 else f&quot;{err:.6E}&quot;)
+            except InvalidOperation:
+                pass
+    if note:
+        print(f&quot;  note: {note}&quot;)
+
+
+# --------------------------------------------------------------------------- cache
+
+def _read_trace(a) -&gt; list[int]:
+    addrs = [parse_int(t) for t in (a.trace or [])]
+    if a.trace_file:
+        with open(a.trace_file) as fh:
+            for line in fh:
+                tokens = line.split(&quot;#&quot;)[0].split()
+                if tokens:
+                    addrs.append(parse_int(tokens[-1]))  # tolerate &quot;R 0x1f&quot; / &quot;W 0x20&quot;
+    return addrs
+
+
+def cmd_cache(a) -&gt; None:
+    size, block = parse_size(a.size), parse_size(a.block)
+    if size % block:
+        die(&quot;cache size must be a multiple of block size&quot;)
+    lines = size // block
+    ways = lines if str(a.assoc).lower() in (&quot;full&quot;, &quot;fa&quot;) else parse_int(a.assoc)
+    if ways &lt; 1 or lines % ways:
+        die(f&quot;associativity {ways} does not divide {lines} lines&quot;)
+    sets = lines // ways
+    ob, ib = ilog2(block, &quot;block size&quot;), ilog2(sets, &quot;number of sets&quot;)
+    tb = a.addr_bits - ib - ob
+    if tb &lt;= 0:
+        die(&quot;address too short for this geometry&quot;)
+
+    kind = &quot;direct-mapped&quot; if ways == 1 else (&quot;fully associative&quot; if sets == 1 else f&quot;{ways}-way set associative&quot;)
+    print(f&quot;{human_bytes(size)} {kind}, {block} B blocks, {a.addr_bits}-bit byte addresses&quot;)
+    row(&quot;lines (blocks)&quot;, lines)
+    row(&quot;sets x ways&quot;, f&quot;{sets} x {ways}&quot;)
+    row(&quot;offset bits&quot;, f&quot;{ob}   addr[{ob - 1}:0]&quot; if ob else &quot;0&quot;)
+    row(&quot;index bits&quot;, f&quot;{ib}   addr[{ib + ob - 1}:{ob}]&quot; if ib else &quot;0   (fully associative)&quot;)
+    row(&quot;tag bits&quot;, f&quot;{tb}   addr[{a.addr_bits - 1}:{ib + ob}]&quot;)
+    meta = tb + 1 + (1 if a.write_back else 0)
+    row(&quot;metadata per line&quot;, f&quot;{tb} tag + 1 valid&quot; + (&quot; + 1 dirty&quot; if a.write_back else &quot;&quot;)
+        + f&quot; = {meta} bits&quot;)
+    row(&quot;total storage&quot;, f&quot;{size * 8} data + {lines * meta} metadata = {size * 8 + lines * meta} bits&quot;)
+
+    addrs = _read_trace(a)
+    if not addrs:
+        return
+
+    print(f&quot;\nTrace ({a.policy.upper()} replacement, allocate on every miss)&quot;)
+    print(f&quot;  {&#x27;#&#x27;:&gt;3}  {&#x27;address&#x27;:&gt;12}  {&#x27;tag&#x27;:&gt;10}  {&#x27;set&#x27;:&gt;5}  {&#x27;off&#x27;:&gt;4}  result  {&#x27;evicted tag&#x27;:&gt;11}  miss type&quot;)
+    cache = [OrderedDict() for _ in range(sets)]
+    shadow: OrderedDict[int, None] = OrderedDict()  # fully-assoc LRU, same capacity
+    seen: set[int] = set()
+    counts = {&quot;hit&quot;: 0, &quot;compulsory&quot;: 0, &quot;capacity&quot;: 0, &quot;conflict&quot;: 0}
+    for n, addr in enumerate(addrs, 1):
+        blk = addr &gt;&gt; ob
+        off, idx, tag = addr &amp; (block - 1), blk &amp; (sets - 1), blk &gt;&gt; ib
+        s = cache[idx]
+        shadow_hit = blk in shadow
+        if shadow_hit:
+            shadow.move_to_end(blk)
+        else:
+            if len(shadow) == lines:
+                shadow.popitem(last=False)
+            shadow[blk] = None
+        evicted = &quot;&quot;
+        if tag in s:
+            result, mtype = &quot;hit &quot;, &quot;&quot;
+            counts[&quot;hit&quot;] += 1
+            if a.policy == &quot;lru&quot;:
+                s.move_to_end(tag)
+        else:
+            result = &quot;MISS&quot;
+            mtype = &quot;compulsory&quot; if blk not in seen else (&quot;conflict&quot; if shadow_hit else &quot;capacity&quot;)
+            counts[mtype] += 1
+            if len(s) == ways:
+                evicted = f&quot;0x{s.popitem(last=False)[0]:X}&quot;
+            s[tag] = None
+        seen.add(blk)
+        print(f&quot;  {n:&gt;3}  {&#x27;0x%X&#x27; % addr:&gt;12}  {&#x27;0x%X&#x27; % tag:&gt;10}  {idx:&gt;5}  {off:&gt;4}  {result}    {evicted:&gt;11}  {mtype}&quot;)
+    total = len(addrs)
+    misses = total - counts[&quot;hit&quot;]
+    print(f&quot;\n  hits {counts[&#x27;hit&#x27;]}/{total} ({counts[&#x27;hit&#x27;] / total:.2%}), misses {misses} &quot;
+          f&quot;(compulsory {counts[&#x27;compulsory&#x27;]}, capacity {counts[&#x27;capacity&#x27;]}, conflict {counts[&#x27;conflict&#x27;]})&quot;)
+
+
+# --------------------------------------------------------------------------- amat / cpu / amdahl
+
+def cmd_amat(a) -&gt; None:
+    levels = []
+    for spec in a.levels:
+        try:
+            hit, mr = spec.split(&quot;:&quot;)
+            levels.append((float(hit), float(mr)))
+        except ValueError:
+            die(f&quot;level {spec!r} must look like HIT_TIME:LOCAL_MISS_RATE, e.g. 1:0.05&quot;)
+    penalty = a.mem
+    terms = []
+    for i in range(len(levels) - 1, -1, -1):
+        hit, mr = levels[i]
+        terms.append(f&quot;L{i + 1}: {hit:g} + {mr:g} x {penalty:g} = {hit + mr * penalty:g}&quot;)
+        penalty = hit + mr * penalty
+    print(&quot;AMAT = hit time + local miss rate x miss penalty (innermost first)&quot;)
+    for t in reversed(terms):
+        row(&quot;&quot;, t)
+    row(&quot;AMAT&quot;, f&quot;{penalty:g} (same unit as inputs)&quot;)
+    g = 1.0
+    for i, (_, mr) in enumerate(levels):
+        g *= mr
+        row(f&quot;global miss rate L{i + 1}&quot;, f&quot;{g:.6g}&quot;)
+
+
+def cmd_cpu(a) -&gt; None:
+    ic = parse_si(a.ic)
+    if a.mix:
+        cpi, parts = 0.0, []
+        total_frac = 0.0
+        for spec in a.mix.split(&quot;,&quot;):
+            f, c = (float(x) for x in spec.split(&quot;:&quot;))
+            total_frac += f
+            cpi += f * c
+            parts.append(f&quot;{f:g}x{c:g}&quot;)
+        print(f&quot;CPI = {&#x27; + &#x27;.join(parts)} = {cpi:g}&quot;)
+        if abs(total_frac - 1) &gt; 1e-9:
+            print(f&quot;  warning: fractions sum to {total_frac:g}, not 1&quot;)
+    elif a.cpi is not None:
+        cpi = a.cpi
+    else:
+        die(&quot;give --cpi or --mix&quot;)
+    if a.clock:
+        f = parse_si(a.clock)
+    elif a.period:
+        f = 1 / parse_si(a.period)
+    else:
+        die(&quot;give --clock or --period&quot;)
+    t = ic * cpi / f
+    print(&quot;CPU time = IC x CPI / f&quot;)
+    row(&quot;instruction count&quot;, f&quot;{ic:g}&quot;)
+    row(&quot;CPI / IPC&quot;, f&quot;{cpi:g} / {1 / cpi:.6g}&quot;)
+    row(&quot;clock&quot;, f&quot;{eng(f, &#x27;Hz&#x27;)} (period {eng(1 / f, &#x27;s&#x27;)})&quot;)
+    row(&quot;cycles&quot;, f&quot;{ic * cpi:g}&quot;)
+    row(&quot;CPU time&quot;, eng(t, &quot;s&quot;))
+    row(&quot;native MIPS&quot;, f&quot;{f / (cpi * 1e6):.6g}&quot;)
+
+
+def cmd_amdahl(a) -&gt; None:
+    p = a.fraction
+    if not 0 &lt;= p &lt;= 1:
+        die(&quot;--fraction must be between 0 and 1&quot;)
+    print(&quot;Speedup = 1 / ((1 - p) + p / s)&quot;)
+    row(&quot;limit (s -&gt; inf)&quot;, &quot;inf&quot; if p == 1 else f&quot;{1 / (1 - p):.6g}x&quot;)
+    if a.speedup is not None:
+        s = a.speedup
+        overall = 1 / ((1 - p) + (0 if math.isinf(s) else p / s))
+        row(f&quot;overall at s={s:g}&quot;, f&quot;{overall:.6g}x&quot;)
+    if a.target is not None:
+        denom = 1 / a.target - (1 - p)
+        if denom &lt;= 0:
+            row(f&quot;s for {a.target:g}x&quot;, &quot;impossible: target exceeds the limit&quot;)
+        else:
+            row(f&quot;s for {a.target:g}x&quot;, f&quot;{p / denom:.6g}x on the improved fraction&quot;)
+
+
+# --------------------------------------------------------------------------- vm
+
+def cmd_vm(a) -&gt; None:
+    page = parse_size(a.page)
+    ob = ilog2(page, &quot;page size&quot;)
+    vpn = a.va_bits - ob
+    print(f&quot;{a.va_bits}-bit virtual addresses, {human_bytes(page)} pages, {a.pte}-byte PTEs&quot;)
+    row(&quot;page offset bits&quot;, ob)
+    row(&quot;VPN bits&quot;, vpn)
+    row(&quot;flat table&quot;, f&quot;2^{vpn} entries x {a.pte} B = {human_bytes((1 &lt;&lt; vpn) * a.pte)}&quot;)
+    if a.pa_bits:
+        row(&quot;PFN bits&quot;, a.pa_bits - ob)
+        row(&quot;physical pages&quot;, f&quot;2^{a.pa_bits - ob}&quot;)
+    per = page // a.pte
+    bpl = ilog2(per, &quot;PTEs per page&quot;)
+    levels = math.ceil(vpn / bpl)
+    row(&quot;PTEs per page&quot;, f&quot;{per}  ({bpl} VPN bits per level)&quot;)
+    row(&quot;levels (table = 1 page)&quot;, f&quot;{levels}  split &quot; +
+        &quot;+&quot;.join(str(min(bpl, vpn - bpl * i)) for i in reversed(range(levels))) + f&quot; + {ob} offset&quot;)
+    if a.tlb:
+        row(&quot;TLB reach&quot;, human_bytes(a.tlb * page))
+
+
+# --------------------------------------------------------------------------- subnet
+
+def cmd_subnet(a) -&gt; None:
+    if a.hosts is not None:
+        need = a.hosts + 2
+        prefix = 32 - math.ceil(math.log2(need)) if a.hosts &gt; 2 else (31 if a.hosts == 2 else 32)
+        print(f&quot;{a.hosts} hosts need /{prefix} &quot;
+              f&quot;({2 ** (32 - prefix)} addresses, {max(2 ** (32 - prefix) - 2, a.hosts)} usable)&quot;)
+        if not a.cidr:
+            return
+    if not a.cidr:
+        die(&quot;give a CIDR block (e.g. 192.168.1.0/26) or --hosts N&quot;)
+    try:
+        net = ipaddress.ip_network(a.cidr, strict=False)
+    except ValueError as e:
+        die(str(e))
+    print(str(net) + (f&quot;   (normalized from {a.cidr})&quot; if str(net) != a.cidr else &quot;&quot;))
+    row(&quot;netmask&quot;, net.netmask)
+    if net.version == 4:
+        row(&quot;wildcard&quot;, net.hostmask)
+    row(&quot;network&quot;, net.network_address)
+    if net.version == 4:
+        row(&quot;broadcast&quot;, net.broadcast_address)
+    total = net.num_addresses
+    if net.version == 4 and net.prefixlen &lt;= 30:
+        usable, first, last = total - 2, net.network_address + 1, net.broadcast_address - 1
+    else:
+        usable, first, last = total, net.network_address, net.broadcast_address
+    row(&quot;total addresses&quot;, total)
+    row(&quot;usable hosts&quot;, usable)
+    row(&quot;host range&quot;, f&quot;{first} - {last}&quot;)
+    row(&quot;private (RFC1918 etc.)&quot;, net.is_private)
+    if a.split:
+        if a.split &lt;= net.prefixlen:
+            die(&quot;--split prefix must be longer than the network prefix&quot;)
+        subs = list(net.subnets(new_prefix=a.split))
+        print(f&quot;\n  {len(subs)} subnets of /{a.split}:&quot;)
+        for s in subs[:64]:
+            print(f&quot;    {s}&quot;)
+        if len(subs) &gt; 64:
+            print(f&quot;    ... {len(subs) - 64} more&quot;)
+
+
+# --------------------------------------------------------------------------- embedded
+
+def cmd_timer(a) -&gt; None:
+    clk = parse_si(a.clock)
+    target = 1 / parse_si(a.period) if a.period else parse_si(a.target)
+    prescalers = [int(x) for x in a.prescalers.split(&quot;,&quot;)]
+    top = 1 &lt;&lt; a.bits
+    print(f&quot;f_clk {eng(clk, &#x27;Hz&#x27;)}, target {eng(target, &#x27;Hz&#x27;)} ({eng(1 / target, &#x27;s&#x27;)}), {a.bits}-bit counter&quot;)
+    print(&quot;  counts = f_clk / (prescaler x f_target); counter runs 0..reload, so reload = counts - 1&quot;)
+    print(f&quot;  {&#x27;prescaler&#x27;:&gt;9}  {&#x27;counts&#x27;:&gt;10}  {&#x27;reload&#x27;:&gt;8}  {&#x27;actual&#x27;:&gt;14}  {&#x27;error&#x27;:&gt;9}&quot;)
+    best = None
+    for p in prescalers:
+        exact = clk / (p * target)
+        n = round(exact)
+        if n &lt; 1 or n &gt; top:
+            print(f&quot;  {p:&gt;9}  {exact:&gt;10.2f}  {&#x27;out of range&#x27;:&gt;8}&quot;)
+            continue
+        actual = clk / (p * n)
+        err = (actual - target) / target
+        print(f&quot;  {p:&gt;9}  {n:&gt;10}  {n - 1:&gt;8}  {eng(actual, &#x27;Hz&#x27;):&gt;14}  {err:&gt;+9.4%}&quot;)
+        if best is None or abs(err) &lt; abs(best[1]) - 1e-15:
+            best = (p, err, n)
+    if best:
+        print(f&quot;\n  best: prescaler {best[0]}, reload {best[2] - 1} &quot;
+              f&quot;(STM32: PSC={best[0] - 1}, ARR={best[2] - 1}; AVR CTC: OCRnA={best[2] - 1})&quot;)
+    else:
+        print(&quot;\n  no prescaler reaches the target; use a wider timer or a larger prescaler&quot;)
+
+
+def cmd_baud(a) -&gt; None:
+    clk, baud, os_ = parse_si(a.clock), parse_si(a.baud), a.oversample
+    exact = clk / (os_ * baud)
+    n = max(1, round(exact))
+    actual = clk / (os_ * n)
+    err = (actual - baud) / baud
+    print(f&quot;f_clk {eng(clk, &#x27;Hz&#x27;)}, target {baud:g} baud, oversampling x{os_}&quot;)
+    row(&quot;divisor&quot;, f&quot;{exact:.4f} -&gt; {n}&quot;)
+    row(&quot;actual baud&quot;, f&quot;{actual:.2f}&quot;)
+    row(&quot;error&quot;, f&quot;{err:+.3%}&quot; + (&quot;   WARNING: above 2%, link may be unreliable&quot; if abs(err) &gt; 0.02 else &quot;&quot;))
+    row(&quot;AVR UBRR (U2X=0)&quot;, n - 1 if os_ == 16 else &quot;n/a (use --oversample 16)&quot;)
+    if os_ == 8:
+        row(&quot;AVR UBRR (U2X=1)&quot;, n - 1)
+    row(&quot;STM32 BRR (OVER8=0)&quot;, f&quot;{round(clk / baud)}  (fractional divider, error &quot;
+        f&quot;{(clk / round(clk / baud) - baud) / baud:+.3%})&quot;)
+
+
+def cmd_adc(a) -&gt; None:
+    vref = parse_si(a.vref)
+    levels = 1 &lt;&lt; a.bits
+    lsb = vref / levels
+    print(f&quot;{a.bits}-bit ADC, Vref {eng(vref, &#x27;V&#x27;)}&quot;)
+    row(&quot;codes&quot;, f&quot;0 .. {levels - 1}&quot;)
+    row(&quot;LSB = Vref / 2^N&quot;, eng(lsb, &quot;V&quot;))
+    row(&quot;alt. Vref / (2^N - 1)&quot;, eng(vref / (levels - 1), &quot;V&quot;) + &quot;  (some datasheets)&quot;)
+    if a.code is not None:
+        c = parse_int(a.code)
+        if not 0 &lt;= c &lt; levels:
+            die(f&quot;code must be 0..{levels - 1}&quot;)
+        row(f&quot;code {c} -&gt;&quot;, f&quot;{eng(c * lsb, &#x27;V&#x27;)} (bin low edge), {eng((c + 0.5) * lsb, &#x27;V&#x27;)} (bin centre)&quot;)
+    if a.volts is not None:
+        v = parse_si(a.volts)
+        c = min(levels - 1, max(0, math.floor(v / lsb)))
+        row(f&quot;{eng(v, &#x27;V&#x27;)} -&gt;&quot;, f&quot;code {c} (0x{c:X})&quot;)
+    row(&quot;quantization error&quot;, f&quot;±{eng(lsb / 2, &#x27;V&#x27;)} (ideal, rounding ADC)&quot;)
+    row(&quot;ideal SNR&quot;, f&quot;{6.02 * a.bits + 1.76:.2f} dB (full-scale sine)&quot;)
+
+
+def cmd_rc(a) -&gt; None:
+    r, c = parse_si(a.r), parse_si(a.c)
+    tau = r * c
+    print(f&quot;R = {eng(r, &#x27;Ω&#x27;)}, C = {eng(c, &#x27;F&#x27;)}&quot;)
+    row(&quot;tau = RC&quot;, eng(tau, &quot;s&quot;))
+    row(&quot;-3 dB cutoff 1/(2πRC)&quot;, eng(1 / (2 * math.pi * tau), &quot;Hz&quot;))
+    row(&quot;10-90% rise (2.2 tau)&quot;, eng(2.2 * tau, &quot;s&quot;))
+    row(&quot;settle to 99.3% (5 tau)&quot;, eng(5 * tau, &quot;s&quot;))
+    if a.t:
+        t = parse_si(a.t)
+        frac = 1 - math.exp(-t / tau)
+        row(f&quot;charge after {eng(t, &#x27;s&#x27;)}&quot;, f&quot;{frac:.4%} of final value&quot;)
+
+
+# --------------------------------------------------------------------------- coding
+
+def _bits(text: str, what: str) -&gt; list[int]:
+    t = text.replace(&quot;_&quot;, &quot;&quot;).replace(&quot; &quot;, &quot;&quot;)
+    if not t or set(t) - {&quot;0&quot;, &quot;1&quot;}:
+        die(f&quot;{what} must be a string of 0s and 1s&quot;)
+    return [int(ch) for ch in t]
+
+
+def cmd_hamming(a) -&gt; None:
+    if a.check:
+        code = _bits(a.value, &quot;codeword&quot;)
+        n = len(code)
+        syndrome = 0
+        for pos in range(1, n + 1):
+            if code[pos - 1]:
+                syndrome ^= pos
+        print(f&quot;Hamming check of {a.value} (positions 1..{n}, left to right, even parity)&quot;)
+        row(&quot;syndrome&quot;, f&quot;{syndrome} (0b{syndrome:b})&quot;)
+        if syndrome == 0:
+            row(&quot;result&quot;, &quot;no single-bit error detected&quot;)
+        elif syndrome &gt; n:
+            row(&quot;result&quot;, &quot;syndrome points past the word: multi-bit error&quot;)
+        else:
+            code[syndrome - 1] ^= 1
+            row(&quot;result&quot;, f&quot;bit {syndrome} flipped; corrected {&#x27;&#x27;.join(map(str, code))}&quot;)
+        data = [code[p - 1] for p in range(1, n + 1) if p &amp; (p - 1)]
+        row(&quot;data bits&quot;, &quot;&quot;.join(map(str, data)))
+        print(&quot;  note: a single syndrome cannot tell a 2-bit error from a 1-bit one; use SEC-DED for that.&quot;)
+        return
+    data = _bits(a.value, &quot;data&quot;)
+    m = len(data)
+    r = 0
+    while (1 &lt;&lt; r) &lt; m + r + 1:
+        r += 1
+    n = m + r
+    code = [0] * (n + 1)  # 1-indexed
+    it = iter(data)
+    for pos in range(1, n + 1):
+        if pos &amp; (pos - 1):
+            code[pos] = next(it)
+    print(f&quot;Hamming({n},{m}) encode of {a.value}: parity at positions 1,2,4,...; even parity&quot;)
+    for i in range(r):
+        p = 1 &lt;&lt; i
+        covered = [q for q in range(1, n + 1) if q &amp; p and q != p]
+        code[p] = sum(code[q] for q in covered) % 2
+        row(f&quot;p{p}&quot;, f&quot;XOR of positions {covered} = {code[p]}&quot;)
+    row(&quot;codeword (pos 1..n)&quot;, &quot;&quot;.join(map(str, code[1:])))
+
+
+def cmd_crc(a) -&gt; None:
+    data, poly = _bits(a.data, &quot;data&quot;), _bits(a.poly, &quot;generator&quot;)
+    if poly[0] != 1:
+        die(&quot;generator must start with 1&quot;)
+    deg = len(poly) - 1
+    work = data + [0] * deg
+    print(f&quot;CRC: data {a.data}, generator {a.poly} (degree {deg}); append {deg} zeros and divide mod 2&quot;)
+    for i in range(len(data)):
+        if work[i]:
+            for j in range(len(poly)):
+                work[i + j] ^= poly[j]
+    rem = work[-deg:] if deg else []
+    row(&quot;remainder&quot;, &quot;&quot;.join(map(str, rem)) or &quot;(none)&quot;)
+    row(&quot;transmitted&quot;, &quot;&quot;.join(map(str, data + rem)))
+
+
+# --------------------------------------------------------------------------- CLI
+
+def main() -&gt; None:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sp = ap.add_subparsers(dest=&quot;cmd&quot;, required=True)
+
+    p = sp.add_parser(&quot;conv&quot;, help=&quot;integer bases / two&#x27;s complement&quot;)
+    p.add_argument(&quot;value&quot;, help=&quot;42, -7, 0x2A, 0b101010, 0o52&quot;)
+    p.add_argument(&quot;--bits&quot;, type=int, help=&quot;bit width (default: smallest of 8/16/32/64 that fits)&quot;)
+    p.set_defaults(fn=cmd_conv)
+
+    p = sp.add_parser(&quot;float&quot;, help=&quot;IEEE 754 encode/decode&quot;)
+    p.add_argument(&quot;value&quot;, help=&quot;decimal number, or a bit pattern with --hex&quot;)
+    p.add_argument(&quot;--hex&quot;, action=&quot;store_true&quot;, help=&quot;decode VALUE as a raw bit pattern&quot;)
+    p.add_argument(&quot;--double&quot;, action=&quot;store_true&quot;, help=&quot;use binary64&quot;)
+    p.set_defaults(fn=cmd_float)
+
+    p = sp.add_parser(&quot;cache&quot;, help=&quot;cache geometry and trace simulation&quot;)
+    p.add_argument(&quot;--size&quot;, required=True, help=&quot;data capacity, e.g. 32KiB&quot;)
+    p.add_argument(&quot;--block&quot;, required=True, help=&quot;block/line size in bytes, e.g. 64&quot;)
+    p.add_argument(&quot;--assoc&quot;, default=&quot;1&quot;, help=&quot;ways (1 = direct-mapped) or &#x27;full&#x27;&quot;)
+    p.add_argument(&quot;--addr-bits&quot;, type=int, default=32)
+    p.add_argument(&quot;--write-back&quot;, action=&quot;store_true&quot;, help=&quot;count a dirty bit per line&quot;)
+    p.add_argument(&quot;--policy&quot;, choices=[&quot;lru&quot;, &quot;fifo&quot;], default=&quot;lru&quot;)
+    p.add_argument(&quot;--trace&quot;, nargs=&quot;*&quot;, help=&quot;byte addresses to simulate&quot;)
+    p.add_argument(&quot;--trace-file&quot;, help=&quot;file with one address per line (last token used)&quot;)
+    p.set_defaults(fn=cmd_cache)
+
+    p = sp.add_parser(&quot;amat&quot;, help=&quot;average memory access time&quot;)
+    p.add_argument(&quot;--levels&quot;, nargs=&quot;+&quot;, required=True, help=&quot;HIT:LOCAL_MISS_RATE per level, L1 first&quot;)
+    p.add_argument(&quot;--mem&quot;, type=float, required=True, help=&quot;main-memory access time&quot;)
+    p.set_defaults(fn=cmd_amat)
+
+    p = sp.add_parser(&quot;cpu&quot;, help=&quot;iron law of performance&quot;)
+    p.add_argument(&quot;--ic&quot;, required=True, help=&quot;instruction count, e.g. 2e9 or 2G&quot;)
+    p.add_argument(&quot;--cpi&quot;, type=float)
+    p.add_argument(&quot;--mix&quot;, help=&quot;FRACTION:CPI pairs, e.g. 0.5:1,0.3:2,0.2:5&quot;)
+    p.add_argument(&quot;--clock&quot;, help=&quot;e.g. 3GHz&quot;)
+    p.add_argument(&quot;--period&quot;, help=&quot;e.g. 250ps&quot;)
+    p.set_defaults(fn=cmd_cpu)
+
+    p = sp.add_parser(&quot;amdahl&quot;, help=&quot;Amdahl&#x27;s law&quot;)
+    p.add_argument(&quot;--fraction&quot;, type=float, required=True, help=&quot;fraction of time that is improved&quot;)
+    p.add_argument(&quot;--speedup&quot;, type=float, help=&quot;speedup of that fraction (inf allowed)&quot;)
+    p.add_argument(&quot;--target&quot;, type=float, help=&quot;solve for the speedup needed to reach this overall&quot;)
+    p.set_defaults(fn=cmd_amdahl)
+
+    p = sp.add_parser(&quot;vm&quot;, help=&quot;paging arithmetic&quot;)
+    p.add_argument(&quot;--va-bits&quot;, type=int, required=True)
+    p.add_argument(&quot;--page&quot;, required=True, help=&quot;page size, e.g. 4KiB&quot;)
+    p.add_argument(&quot;--pte&quot;, type=int, default=8, help=&quot;bytes per page-table entry&quot;)
+    p.add_argument(&quot;--pa-bits&quot;, type=int)
+    p.add_argument(&quot;--tlb&quot;, type=int, help=&quot;TLB entries, for reach&quot;)
+    p.set_defaults(fn=cmd_vm)
+
+    p = sp.add_parser(&quot;subnet&quot;, help=&quot;IP subnetting&quot;)
+    p.add_argument(&quot;cidr&quot;, nargs=&quot;?&quot;, help=&quot;e.g. 10.0.0.0/22&quot;)
+    p.add_argument(&quot;--split&quot;, type=int, help=&quot;list subnets of this longer prefix&quot;)
+    p.add_argument(&quot;--hosts&quot;, type=int, help=&quot;smallest IPv4 prefix holding N hosts&quot;)
+    p.set_defaults(fn=cmd_subnet)
+
+    p = sp.add_parser(&quot;timer&quot;, help=&quot;MCU timer prescaler/reload&quot;)
+    p.add_argument(&quot;--clock&quot;, required=True, help=&quot;timer input clock, e.g. 16MHz&quot;)
+    p.add_argument(&quot;--target&quot;, help=&quot;interrupt/overflow frequency, e.g. 1kHz&quot;)
+    p.add_argument(&quot;--period&quot;, help=&quot;or the period, e.g. 10ms&quot;)
+    p.add_argument(&quot;--bits&quot;, type=int, default=16)
+    p.add_argument(&quot;--prescalers&quot;, default=&quot;1,8,64,256,1024&quot;, help=&quot;comma list&quot;)
+    p.set_defaults(fn=cmd_timer)
+
+    p = sp.add_parser(&quot;baud&quot;, help=&quot;UART divisor and error&quot;)
+    p.add_argument(&quot;--clock&quot;, required=True)
+    p.add_argument(&quot;--baud&quot;, required=True)
+    p.add_argument(&quot;--oversample&quot;, type=int, default=16)
+    p.set_defaults(fn=cmd_baud)
+
+    p = sp.add_parser(&quot;adc&quot;, help=&quot;ADC resolution and conversion&quot;)
+    p.add_argument(&quot;--bits&quot;, type=int, required=True)
+    p.add_argument(&quot;--vref&quot;, required=True, help=&quot;e.g. 3.3V&quot;)
+    p.add_argument(&quot;--code&quot;, help=&quot;convert a code to volts&quot;)
+    p.add_argument(&quot;--volts&quot;, help=&quot;convert a voltage to a code&quot;)
+    p.set_defaults(fn=cmd_adc)
+
+    p = sp.add_parser(&quot;rc&quot;, help=&quot;RC circuit timing&quot;)
+    p.add_argument(&quot;--r&quot;, required=True, help=&quot;e.g. 10k&quot;)
+    p.add_argument(&quot;--c&quot;, required=True, help=&quot;e.g. 100nF&quot;)
+    p.add_argument(&quot;--t&quot;, help=&quot;elapsed time for charge fraction, e.g. 1ms&quot;)
+    p.set_defaults(fn=cmd_rc)
+
+    p = sp.add_parser(&quot;hamming&quot;, help=&quot;Hamming code encode/check&quot;)
+    p.add_argument(&quot;value&quot;, help=&quot;data bits (encode) or codeword (with --check)&quot;)
+    p.add_argument(&quot;--check&quot;, action=&quot;store_true&quot;)
+    p.set_defaults(fn=cmd_hamming)
+
+    p = sp.add_parser(&quot;crc&quot;, help=&quot;CRC by polynomial long division&quot;)
+    p.add_argument(&quot;--data&quot;, required=True, help=&quot;message bits, e.g. 11010011101100&quot;)
+    p.add_argument(&quot;--poly&quot;, required=True, help=&quot;generator bits, e.g. 1011 for x^3+x+1&quot;)
+    p.set_defaults(fn=cmd_crc)
+
+    args = ap.parse_args()
+    args.fn(args)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre></section>
+</body></html>

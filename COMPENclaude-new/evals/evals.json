@@ -1,0 +1,59 @@
+{
+  "skill_name": "compenclaude",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "32 KiB 8-way set associative cache, 64 byte blocks, 32-bit byte addresses. How many tag, index and offset bits? Which set does 0x1234ABCD go to?",
+      "expected_output": "Offset 6 bits, 64 sets so index 6 bits, tag 20 bits. 0x1234ABCD maps to set 0x2F (47), tag 0x1234A, offset 0x0D. Shows the formula sets = size / (block x ways) and checks that 20 + 6 + 6 = 32.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "classic 5 stage risc-v pipeline with full forwarding. how many stalls?\nlw x1, 0(x2)\nadd x3, x1, x4\nsub x5, x3, x6\nsw x5, 8(x2)",
+      "expected_output": "Exactly one stall (load-use between lw and add). add -> sub and sub -> sw are covered by forwarding. Draws a pipeline diagram and states the forwarding assumption.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "encode -13.625 as ieee 754 single precision",
+      "expected_output": "0xC15A0000. Sign 1, -13.625 = -1101.101b = -1.101101 x 2^3, stored exponent 130 = 10000010, fraction 10110100000000000000000. Shows each step.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "is this ok for my counter? always @(posedge clk) begin count = count + 1; if (count == 10) count = 0; end",
+      "expected_output": "Flags the blocking assignments in a clocked block, explains the simulation/synthesis ordering risk, adds a reset, and rewrites it with always_ff and nonblocking assignments with explicit widths.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "my stm32 i2c read just hangs forever at the busy flag. what do i check",
+      "expected_output": "Ranked checklist: pull-up resistors present, peripheral and GPIO clocks enabled, pins in alternate-function open-drain mode, correct 7-bit vs 8-bit address, bus stuck low after reset (clock out 9 pulses), timeouts in wait loops. Says how to confirm each with a logic analyzer or scope.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "I declared my ISR counter volatile so it's thread safe right?",
+      "expected_output": "Corrects the premise: volatile prevents the compiler from caching or removing accesses but does not make read-modify-write atomic or order accesses across cores. Recommends critical sections or atomics with a short example.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Split 10.20.0.0/22 into subnets for 200, 100, 50 and 2 hosts",
+      "expected_output": "VLSM, largest first: 10.20.0.0/24 (200), 10.20.1.0/25 (100), 10.20.1.128/26 (50), 10.20.1.192/30 (2). Gives network, broadcast and usable range for each and notes the remaining free space.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "i dont understand setup and hold time at all, exam next week",
+      "expected_output": "Teaching mode: one-sentence intuition, the two inequalities with every symbol defined, a small worked numeric example, the common mistake (thinking a slower clock fixes hold), and one practice question with the answer held back.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "what does SPI stand for",
+      "expected_output": "Answers directly: Serial Peripheral Interface, with at most a one-line description. No long lecture.",
+      "files": []
+    }
+  ]
+}
